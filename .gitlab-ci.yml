@@ -5,6 +5,8 @@ stages:
 
 build:
   stage: build
+  only:
+    - master
   before_script:
     - apt-get update --yes && apt-get install --yes cmake
   script:
@@ -21,6 +23,8 @@ build:
 
 test:
   stage: test
+  only:
+    - master
   before_script:
     - apt-get update --yes && apt-get install --yes cmake
   script:
