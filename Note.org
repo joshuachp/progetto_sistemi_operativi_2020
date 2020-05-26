@@ -13,8 +13,10 @@ Client fifo =device_fifo.pid= dove *pid* è il pid del device. Questa fifo è ge
 :LOGBOOK:
 CLOCK: [2020-05-20 mer 10:59]--[2020-05-20 mer 11:25] =>  0:26
 :END:
-*** TODO Server [1/2] [50%]
+*** TODO Server [1/4] [25%]
 - [X] Print help
+- [ ] Terminazione
+- [ ] Spawn dei processi
 - [ ] Lista contenente i device
   - [ ] Struttura device con: pid, posizione
 *** TODO Client [1/2] [50%]
