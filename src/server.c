@@ -33,12 +33,14 @@ void setup_sig_handler();
 
 int main(int argc, char *argv[]) {
 
-  uint32_t KEY;
-  if (argc != 3 || sscanf(argv[1], "%u", &KEY) != 1) {
+  uint32_t key;
+  if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
     print_help();
     return 1;
   }
-  char *FILE = argv[3];
+  char *file = argv[2];
+  // XXX: Testing
+  vec_2 **positions = read_positions_file(file);
 
   // Signals setup
   setup_sig_handler();

@@ -10,192 +10,63 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 vec_2 **read_positions_file(char *filename) {
-  // Open the file read-only
+  // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
     err_exit("open");
   }
-  // Creates the position array of certain size p_length that will be doubled
-  // every time we reach the last element
-  size_t p_length = MIN_POSITIONS_ARRAY_LENGTH;
-  vec_2 **positions = calloc(p_length, sizeof(vec_2 *));
-  vec_2 *array;
-  size_t i = 0;
-  // Buffer for the read
-  char *buf = calloc(BUF_READ_SIZE, sizeof(char));
-  size_t b_read = read(fd, buf, BUF_READ_SIZE - 1);
-  if (b_read == -1)
-    err_exit("Error read position file");
-  else if (b_read == 0) {
-    fputs("Error positions file is empty", stderr);
-    return NULL;
-  }
-  // Lines of the buff
-  char **lines;
-  size_t j;
-  bool join_last;
-  char *join = NULL;
-  while (b_read != 0) {
-    // Setts last byte to 0 for strings functions
-    buf[b_read] = 0;
-    // Saves if is necessary to join last line
-    join_last = buf[b_read - 1] != '\n';
-    // If no join is needed gets the lines from the buffer. Instead otherwise
-    // it joins the join string with the buffer.
-    if (join == NULL) {
-      lines = get_lines_buf_positions(buf);
-    } else {
-      join = realloc(join, (strlen(join) + b_read) * sizeof(char));
-      join = strcat(join, buf);
-      lines = get_lines_buf_positions(join);
-      free(join);
-      join = NULL;
-    }
-    // If there is the need to join with next buffer save the last line into
-    // join
-    if (join_last) {
-      j = 0;
-      while (lines[j] != NULL)
-        j++;
-      j--;
-      join = strdup(lines[j]);
-      lines[j] = NULL;
-    }
-    j = 0;
-    while (lines[j] != NULL) {
-      // Parse the array
-      array = str_to_position_array(lines[j]);
-      if (array == NULL) {
-        free(positions);
-        free(lines);
-        free(buf);
-        return NULL;
-      }
-      // Add the array to the positions
-      positions = add_array_to_positions(positions, array, &i, &p_length);
-      j++;
-    }
-    free(lines);
-    lines = NULL;
-    // Read next chunk
-    b_read = read(fd, buf, BUF_READ_SIZE - 1);
-    if (b_read == -1)
-      err_exit("Error read position file");
-  }
-  // Check if there is still a line to join without buffer
-  if (join != NULL) {
-    array = str_to_position_array(join);
-    if (array == NULL) {
-      free(positions);
-      free(lines);
-      free(buf);
-      return NULL;
-    }
-    positions = add_array_to_positions(positions, array, &i, &p_length);
-  }
-  free(buf);
-  return positions;
-}
+  // File stats
+  struct stat sb;
+  if (fstat(fd, &sb) == -1)
+    err_exit("Error fstat");
+  // Map file to buff
+  char *buf =
+      mmap(NULL, sb.st_size + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+  if (buf == MAP_FAILED)
+    err_exit("Error mmap");
+  // make buffer a string
+  buf[sb.st_size] = '0';
+  // Close file
+  if (close(fd) == -1)
+    err_exit("Error close");
 
-vec_2 *str_to_position_array(char *str) {
-  // Check if the string is NULL or has enough length for 5 positions
-  if (str == NULL || strlen(str) != 19) {
-    return error_parsing_positions(str);
-  }
-  char *str_pos = strdup(str);
-  vec_2 *vec = malloc(5 * sizeof(vec_2));
-  uint8_t count = 0;
-  uint32_t i, j;
-  // Divide the string for each separator `|`
-  char *part = strtok(str_pos, "|");
-  while (part != NULL) {
-    // Checks if it contains two unsigned integer that are on the board
-    if (sscanf(part, "%u,%u", &i, &j) != 2 || i >= 10 || j >= 10) {
-      free(str_pos);
-      free(vec);
-      return error_parsing_positions(str);
-    }
-    vec[count].i = i;
-    vec[count].j = j;
-
-    count++;
-    part = strtok(NULL, "|");
-  }
-  // Returns error if there aren't 5 elements
-  if (count != 5) {
-    free(str_pos);
-    free(vec);
-    return error_parsing_positions(str);
-  }
-  free(str_pos);
-  return vec;
-}
-
-void *error_parsing_positions(char *str) {
-  fprintf(stderr, "Error parsing positions: %s\n", str);
+  munmap(buf, sb.st_size + 1);
   return NULL;
 }
 
-char **get_lines_buf_positions(char *buf) {
-  size_t i = 0;
-  // Find first character that is not a new line character
-  while (buf[i] == '\n')
-    i++;
-  // If reached end return null
-  if (buf[i] == 0)
+char *get_next_line_buf(char *buf, size_t start) {
+  // Get starting string
+  char *str = &buf[start];
+
+  // Find next new line
+  char *end;
+  end = strchr(str, '\n');
+  if (end == NULL)
     return NULL;
-  // Lines are dynamically allocated
-  char **lines = calloc(MIN_POSITIONS_ARRAY_LENGTH, sizeof(char *));
-  size_t l_length = MIN_POSITIONS_ARRAY_LENGTH;
-  size_t count = 0;
-  // Initialize firs string
-  lines[count] = &buf[i];
-  count++;
-  // Cycle all the characters
-  while (buf[i] != 0) {
-    // Check if it's a new line to close previews string
-    if (buf[i] == '\n') {
-      buf[i] = 0;
-      i++;
-      // Find first character that is not a new line character
-      while (buf[i] == '\n') {
-        i++;
-      }
-      // If reached the end returns
-      if (buf[i] == 0)
-        return lines;
-      // Set new string
-      lines[count] = &buf[i];
-      count++;
-      lines[count] = NULL;
-      // If last element is reached double the array dimension
-      if (count == MIN_POSITIONS_ARRAY_LENGTH - 1) {
-        l_length *= 2;
-        lines = realloc(lines, l_length * sizeof(char *));
-      }
-    }
-    // Increment first wile
-    i++;
-  }
-  return lines;
+
+  *end = 0;
+  char *ret = malloc(sizeof(char) * (end - str));
+  ret = strcpy(ret, str);
+
+  return ret;
 }
 
-vec_2 **add_array_to_positions(vec_2 **positions, vec_2 *array, size_t *index,
-                               size_t *size) {
-  positions[*index] = array;
-  // Increment i and check if its the last element, if it is double the
-  // size of the array
-  *index += 1;
-  if (*index == *size - 1) {
-    *size *= 2;
-    positions = realloc(positions, *size * sizeof(vec_2 *));
+vec_2 *parse_position_str(char *str) {
+  if (str == 0 || strlen(str) != 19) {
+    return NULL;
   }
-  // Sets last element to NULL
-  positions[*index] = NULL;
-  return positions;
+  vec_2 *ret = malloc(sizeof(vec_2) * 5);
+  int check = sscanf(str, "%hhu,%hhu|%hhu,%hhu|%hhu,%hhu|%hhu,%hhu|%hhu,%hhu",
+                     &ret[0].i, &ret[0].j, &ret[1].i, &ret[1].j, &ret[2].i,
+                     &ret[2].j, &ret[3].i, &ret[3].j, &ret[4].i, &ret[4].j);
+  if (check != 10) {
+    return NULL;
+  }
+  return ret;
 }
