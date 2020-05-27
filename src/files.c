@@ -38,11 +38,32 @@ vec_2 **read_positions_file(char *filename) {
   // Lines of the buff
   char **lines;
   size_t j;
+  bool join_last;
+  char *join = NULL;
   while (b_read != 0) {
     // Setts last byte to 0 for strings functions
     buf[b_read] = 0;
-    // Gets each line
-    lines = get_lines_buf_positions(buf);
+    // Saves if is necessary to join last line
+    join_last = buf[b_read - 1] != '\n';
+    // If no join is needed gets the lines from the buffer. Instead otherwise
+    // it joins the join string with the buffer.
+    if (join == NULL) {
+      lines = get_lines_buf_positions(buf);
+    } else {
+      join = realloc(join, (strlen(join) + b_read) * sizeof(char));
+      join = strcat(join, buf);
+      lines = get_lines_buf_positions(join);
+      free(join);
+      join = NULL;
+    }
+    if (join_last) {
+      j = 0;
+      while (lines[j] != NULL)
+        j++;
+      j--;
+      join = strdup(lines[j]);
+      lines[j] = NULL;
+    }
     j = 0;
     while (lines[j] != NULL) {
       array = str_to_position_array(lines[j]);
@@ -56,10 +77,22 @@ vec_2 **read_positions_file(char *filename) {
       j++;
     }
     free(lines);
+    lines = NULL;
     // Read next chunk
     b_read = read(fd, buf, BUF_READ_SIZE - 1);
     if (b_read == -1)
       err_exit("Error read position file");
+  }
+  if (join != NULL) {
+    array = str_to_position_array(join);
+    if (array == NULL) {
+      free(positions);
+      free(lines);
+      free(buf);
+      return NULL;
+    }
+    positions = add_array_to_positions(positions, array, &i, &p_length);
+    j++;
   }
   free(buf);
   return positions;
@@ -71,7 +104,7 @@ vec_2 *str_to_position_array(char *str) {
     return error_parsing_positions(str);
   }
   char *str_pos = strdup(str);
-  vec_2 *vec = calloc(5, sizeof(vec_2));
+  vec_2 *vec = malloc(5 * sizeof(vec_2));
   uint8_t count = 0;
   uint32_t i, j;
   // Divide the string for each separator `|`
