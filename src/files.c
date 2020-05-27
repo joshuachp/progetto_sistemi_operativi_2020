@@ -56,6 +56,8 @@ vec_2 **read_positions_file(char *filename) {
       free(join);
       join = NULL;
     }
+    // If there is the need to join with next buffer save the last line into
+    // join
     if (join_last) {
       j = 0;
       while (lines[j] != NULL)
@@ -66,6 +68,7 @@ vec_2 **read_positions_file(char *filename) {
     }
     j = 0;
     while (lines[j] != NULL) {
+      // Parse the array
       array = str_to_position_array(lines[j]);
       if (array == NULL) {
         free(positions);
@@ -73,6 +76,7 @@ vec_2 **read_positions_file(char *filename) {
         free(buf);
         return NULL;
       }
+      // Add the array to the positions
       positions = add_array_to_positions(positions, array, &i, &p_length);
       j++;
     }
@@ -83,6 +87,7 @@ vec_2 **read_positions_file(char *filename) {
     if (b_read == -1)
       err_exit("Error read position file");
   }
+  // Check if there is still a line to join without buffer
   if (join != NULL) {
     array = str_to_position_array(join);
     if (array == NULL) {
@@ -92,7 +97,6 @@ vec_2 **read_positions_file(char *filename) {
       return NULL;
     }
     positions = add_array_to_positions(positions, array, &i, &p_length);
-    j++;
   }
   free(buf);
   return positions;
