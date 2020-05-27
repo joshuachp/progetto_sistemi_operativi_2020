@@ -4,6 +4,8 @@
 #include "defines.h"
 #include "err_exit.h"
 #include "fifo.h"
+#include "files.h"
+#include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
 #include <signal.h>
@@ -88,3 +90,4 @@ void setup_sig_handler() {
     err_exit("sigaction");
 #endif
 }
+
