@@ -7,7 +7,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BUFF_READ_SIZE 256
+#define BUF_READ_SIZE 256
+#define MIN_POSITIONS_ARRAY_LENGTH 6;
 
 /**
  * Messages sent from the clients to the devices
