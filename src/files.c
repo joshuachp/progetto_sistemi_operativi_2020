@@ -52,7 +52,7 @@ vec_2 **read_positions_file(char *filename) {
         free(buf);
         return NULL;
       }
-      add_array_to_positions(positions, array, &i, &p_length);
+      positions = add_array_to_positions(positions, array, &i, &p_length);
       j++;
     }
     free(lines);
