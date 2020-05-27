@@ -38,3 +38,15 @@ void *error_parsing_positions(char *);
  * @return Array of lines, NULL on error
  */
 char **get_lines_buf_positions(char *);
+
+/**
+ * Add an array to the positions, if the element is the last it will double the
+ * size of the positions matrix.
+ *
+ * @param positions Matrix of the positions
+ * @param array Array to add
+ * @param index Index to add the array
+ * @param size First size of the matrix
+ * @return Pointer to the matrix
+ */
+vec_2 **add_array_to_positions(vec_2 **, vec_2 *, size_t *, size_t *);

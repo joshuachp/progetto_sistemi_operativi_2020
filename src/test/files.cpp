@@ -104,7 +104,6 @@ TEST(get_lines_buf, ok) {
   ASSERT_FALSE(lines == NULL);
   size_t i = 0;
   while (lines[i] != NULL) {
-    printf("%s\n", lines[i]);
     i++;
   }
   ASSERT_EQ(3, i);

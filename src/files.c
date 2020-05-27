@@ -6,6 +6,7 @@
 #include "err_exit.h"
 #include "position.h"
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +24,7 @@ vec_2 **read_positions_file(char *filename) {
   // every time we reach the last element
   size_t p_length = MIN_POSITIONS_ARRAY_LENGTH;
   vec_2 **positions = calloc(p_length, sizeof(vec_2 *));
+  vec_2 *array;
   size_t i = 0;
   // Buffer for the read
   char *buf = calloc(BUF_READ_SIZE, sizeof(char));
@@ -43,27 +45,23 @@ vec_2 **read_positions_file(char *filename) {
     lines = get_lines_buf_positions(buf);
     j = 0;
     while (lines[j] != NULL) {
-      positions[i] = str_to_position_array(lines[j]);
-      // Error parsing line
-      if (positions[i] == NULL)
+      array = str_to_position_array(lines[j]);
+      if (array == NULL) {
+        free(positions);
+        free(lines);
+        free(buf);
         return NULL;
-      // Increment i and check if its the last element, if it is double the
-      // size of the array
-      i++;
-      if (i == p_length - 1) {
-        p_length *= 2;
-        positions = realloc(positions, p_length * sizeof(vec_2 *));
       }
-      // Sets last element to NULL
-      positions[i] = NULL;
-      // Increment wile loop
+      add_array_to_positions(positions, array, &i, &p_length);
       j++;
     }
+    free(lines);
     // Read next chunk
     b_read = read(fd, buf, BUF_READ_SIZE - 1);
     if (b_read == -1)
       err_exit("Error read position file");
   }
+  free(buf);
   return positions;
 }
 
@@ -148,4 +146,19 @@ char **get_lines_buf_positions(char *buf) {
     i++;
   }
   return lines;
+}
+
+vec_2 **add_array_to_positions(vec_2 **positions, vec_2 *array, size_t *index,
+                               size_t *size) {
+  positions[*index] = array;
+  // Increment i and check if its the last element, if it is double the
+  // size of the array
+  *index += 1;
+  if (*index == *size - 1) {
+    *size *= 2;
+    positions = realloc(positions, *size * sizeof(vec_2 *));
+  }
+  // Sets last element to NULL
+  positions[*index] = NULL;
+  return positions;
 }
