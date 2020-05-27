@@ -36,21 +36,52 @@ vec_2 **read_positions_file(char *filename) {
   if (close(fd) == -1)
     err_exit("Error close");
 
+  // Posizioni
+  vec_2 **positions = malloc(sizeof(vec_2 *));
+  size_t p_length = 0;
+  positions[p_length] = NULL;
+  vec_2 *array;
+
+  // Lines
+  size_t index = 0;
+  char *line;
+  while (index != sb.st_size) {
+    line = get_next_line_buf(buf, index);
+
+    // Parse line
+    array = parse_position_str(line);
+
+    // add to positions
+    positions = realloc(positions, p_length + 1*sizeof(vec_2*));
+    positions[p_length] = array;
+    p_length++;
+    positions[p_length] = NULL;
+
+    // Next line
+    index += strlen(line + 1);
+
+    // Exit while
+    free(line);
+    line = NULL;
+  }
+
   munmap(buf, sb.st_size + 1);
-  return NULL;
+  return positions;
 }
 
 char *get_next_line_buf(char *buf, size_t start) {
   // Get starting string
   char *str = &buf[start];
+  if (str == 0) {
+    return NULL;
+  }
 
   // Find next new line
   char *end;
   end = strchr(str, '\n');
-  if (end == NULL)
-    return NULL;
+  if (end != NULL)
+    *end = 0;
 
-  *end = 0;
   char *ret = malloc(sizeof(char) * (end - str));
   ret = strcpy(ret, str);
 
