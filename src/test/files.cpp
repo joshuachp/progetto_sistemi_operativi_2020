@@ -33,6 +33,20 @@ TEST(read_positions_file, input) {
 }
 
 /**
+ * Test on the position with big input file
+ */
+TEST(read_positions_file, input_big) {
+  char filename[] = "../input/big_file_posizioni.txt";
+  vec_2 **positions = read_positions_file(filename);
+  ASSERT_TRUE(positions != NULL);
+  size_t p_length = 0;
+  while (positions[p_length] != NULL) {
+    p_length++;
+  }
+  ASSERT_EQ(5, p_length);
+}
+
+/**
  * Test string to position array
  */
 TEST(str_to_position_array, ok) {
