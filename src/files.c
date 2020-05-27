@@ -34,14 +34,16 @@ vec_2 **read_positions_file(char *filename) {
     return NULL;
   }
   // Lines of the buff
-  char *line;
+  char **lines;
+  size_t j;
   while (b_read != 0) {
     // Setts last byte to 0 for strings functions
     buf[b_read] = 0;
     // Gets each line
-    line = strtok(buf, "\n");
-    while (line != NULL) {
-      positions[i] = str_to_position_array(line);
+    lines = get_lines_buf_positions(buf);
+    j = 0;
+    while (lines[j] != NULL) {
+      positions[i] = str_to_position_array(lines[j]);
       // Error parsing line
       if (positions[i] == NULL)
         return NULL;
@@ -54,10 +56,10 @@ vec_2 **read_positions_file(char *filename) {
       }
       // Sets last element to NULL
       positions[i] = NULL;
-
-      line = strtok(NULL, "\n");
+      // Increment wile loop
+      j++;
     }
-
+    // Read next chunk
     b_read = read(fd, buf, BUF_READ_SIZE - 1);
     if (b_read == -1)
       err_exit("Error read position file");
