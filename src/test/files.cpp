@@ -100,13 +100,14 @@ TEST(get_lines_buf, ok) {
   char expected_0[] = "Test multi";
   char expected_1[] = " lines ";
   char expected_2[] = "strings";
-  char **lines = get_lines_buf(buf, strlen(buf));
+  char **lines = get_lines_buf_positions(buf);
   ASSERT_FALSE(lines == NULL);
   size_t i = 0;
   while (lines[i] != NULL) {
+    printf("%s\n", lines[i]);
     i++;
   }
-  ASSERT_EQ(3, i - 1);
+  ASSERT_EQ(3, i);
   ASSERT_TRUE(strcmp(expected_0, lines[0]) == 0);
   ASSERT_TRUE(strcmp(expected_1, lines[1]) == 0);
   ASSERT_TRUE(strcmp(expected_2, lines[2]) == 0);
@@ -122,13 +123,13 @@ TEST(get_lines_buf, new_line_end) {
   char expected_0[] = "Test multi";
   char expected_1[] = " lines ";
   char expected_2[] = "strings";
-  char **lines = get_lines_buf(buf, strlen(buf));
+  char **lines = get_lines_buf_positions(buf);
   ASSERT_FALSE(lines == NULL);
   size_t i = 0;
   while (lines[i] != NULL) {
     i++;
   }
-  ASSERT_EQ(3, i - 1);
+  ASSERT_EQ(3, i);
   ASSERT_TRUE(strcmp(expected_0, lines[0]) == 0);
   ASSERT_TRUE(strcmp(expected_1, lines[1]) == 0);
   ASSERT_TRUE(strcmp(expected_2, lines[2]) == 0);
@@ -145,18 +146,40 @@ TEST(get_lines_buf, double_new_line_end) {
   char expected_0[] = "Test multi";
   char expected_1[] = " lines ";
   char expected_2[] = "strings";
-  char expected_3[] = "";
-  char **lines = get_lines_buf(buf, strlen(buf));
+  char **lines = get_lines_buf_positions(buf);
   ASSERT_FALSE(lines == NULL);
   size_t i = 0;
   while (lines[i] != NULL) {
     i++;
   }
   // Only 3 because the 4th is just the \x0
-  ASSERT_EQ(3, i - 1);
+  ASSERT_EQ(3, i);
   ASSERT_TRUE(strcmp(expected_0, lines[0]) == 0);
   ASSERT_TRUE(strcmp(expected_1, lines[1]) == 0);
   ASSERT_TRUE(strcmp(expected_2, lines[2]) == 0);
-  // Still exists 
-  ASSERT_TRUE(strcmp(expected_3, lines[3]) == 0);
+}
+
+/**
+ * Test get lines of buf double newline at the beginning
+ */
+TEST(get_lines_buf, double_new_line_beginning) {
+  char buf[] = "\n"
+               "\n"
+               "Test multi\n"
+               " lines \n"
+               "strings\n";
+  char expected_0[] = "Test multi";
+  char expected_1[] = " lines ";
+  char expected_2[] = "strings";
+  char **lines = get_lines_buf_positions(buf);
+  ASSERT_FALSE(lines == NULL);
+  size_t i = 0;
+  while (lines[i] != NULL) {
+    i++;
+  }
+  // Only 3 because the 4th is just the \x0
+  ASSERT_EQ(3, i);
+  ASSERT_TRUE(strcmp(expected_0, lines[0]) == 0);
+  ASSERT_TRUE(strcmp(expected_1, lines[1]) == 0);
+  ASSERT_TRUE(strcmp(expected_2, lines[2]) == 0);
 }

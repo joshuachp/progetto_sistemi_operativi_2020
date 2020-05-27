@@ -34,8 +34,7 @@ void *error_parsing_positions(char *);
 /**
  * Transform a string buf in an array of strings for each line in the bug.
  *
- * @param buf The buffer
- * @param buf_size Size of the buffer
+ * @param buf The buffer string
  * @return Array of lines, NULL on error
  */
-char **get_lines_buf(char *, size_t);
+char **get_lines_buf_positions(char *);

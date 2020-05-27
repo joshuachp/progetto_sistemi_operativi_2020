@@ -104,31 +104,46 @@ void *error_parsing_positions(char *str) {
   return NULL;
 }
 
-char **get_lines_buf(char *buf, size_t buf_size) {
-  size_t i;
+char **get_lines_buf_positions(char *buf) {
+  size_t i = 0;
+  // Find first character that is not a new line character
+  while (buf[i] == '\n')
+    i++;
+  // If reached end return null
+  if (buf[i] == 0)
+    return NULL;
+  // Lines are dynamically allocated
+  char **lines = calloc(MIN_POSITIONS_ARRAY_LENGTH, sizeof(char *));
+  size_t l_length = MIN_POSITIONS_ARRAY_LENGTH;
   size_t count = 0;
-  // Count the number of new lines
-  for (i = 0; i < buf_size; i++) {
-    if (buf[i] == '\n')
-      count++;
-  }
-  // Not consider last newline
-  if (buf[buf_size - 1] == '\n')
-    count--;
-  // Allocate the array plus the NULL terminator
-  char **lines = calloc(count + 1, sizeof(char *));
-  count = 0;
-  lines[count] = buf;
-  for (i = 0; i < buf_size - 1; i++) {
-    // If encounters a newline replace it and starts the new string
+  // Initialize firs string
+  lines[count] = &buf[i];
+  count++;
+  // Cycle all the characters
+  while (buf[i] != 0) {
+    // Check if it's a new line to close previews string
     if (buf[i] == '\n') {
       buf[i] = 0;
+      i++;
+      // Find first character that is not a new line character
+      while (buf[i] == '\n') {
+        i++;
+      }
+      // If reached the end returns
+      if (buf[i] == 0)
+        return lines;
+      // Set new string
+      lines[count] = &buf[i];
       count++;
-      lines[count] = &buf[i + 1];
+      lines[count] = NULL;
+      // If last element is reached double the array dimension
+      if (count == MIN_POSITIONS_ARRAY_LENGTH - 1) {
+        l_length *= 2;
+        lines = realloc(lines, l_length * sizeof(char *));
+      }
     }
+    // Increment first wile
+    i++;
   }
-  // Check last char for newline
-  if (buf[i] == '\n')
-    buf[i] = 0;
   return lines;
 }
