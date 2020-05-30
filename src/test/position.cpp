@@ -37,9 +37,9 @@ TEST(create_list_positions, base) {
  * Test creation of positions list
  */
 TEST(create_list_positions, value) {
-  node_position node = {.value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-                        .next = NULL,
-                        .prev = NULL};
+  node_positions node = {.value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
+                         .next = NULL,
+                         .prev = NULL};
   list_positions *list = create_list_positions(&node, &node);
   ASSERT_TRUE(list->head != NULL);
   ASSERT_TRUE(list->head->next == NULL);
@@ -52,11 +52,12 @@ TEST(create_list_positions, value) {
  * Test creation of positions list
  */
 TEST(free_list_positions, base) {
-  node_position node_stack = {.value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-                              .next = NULL,
-                              .prev = NULL};
-  node_position *node = (node_position *)malloc(sizeof(node_position));
-  std::memcpy(node, &node_stack, sizeof(node_position));
+  node_positions node_stack = {
+      .value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
+      .next = NULL,
+      .prev = NULL};
+  node_positions *node = (node_positions *)malloc(sizeof(node_positions));
+  std::memcpy(node, &node_stack, sizeof(node_positions));
   list_positions *list = create_list_positions(node, node);
   ASSERT_TRUE(list->head != NULL);
   ASSERT_NO_THROW(free_list_positions(list));
@@ -66,13 +67,14 @@ TEST(free_list_positions, base) {
  * Test append of positions list
  */
 TEST(append_list_positions, ok) {
-  node_position node_stack = {.value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-                              .next = NULL,
-                              .prev = NULL};
-  node_position *node1 = (node_position *)malloc(sizeof(node_position));
-  node_position *node2 = (node_position *)malloc(sizeof(node_position));
-  std::memcpy(node1, &node_stack, sizeof(node_position));
-  std::memcpy(node2, &node_stack, sizeof(node_position));
+  node_positions node_stack = {
+      .value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
+      .next = NULL,
+      .prev = NULL};
+  node_positions *node1 = (node_positions *)malloc(sizeof(node_positions));
+  node_positions *node2 = (node_positions *)malloc(sizeof(node_positions));
+  std::memcpy(node1, &node_stack, sizeof(node_positions));
+  std::memcpy(node2, &node_stack, sizeof(node_positions));
   list_positions *list = create_list_positions(node1, node1);
   append_list_positions(list, node2);
   ASSERT_EQ(list->tail, node2);

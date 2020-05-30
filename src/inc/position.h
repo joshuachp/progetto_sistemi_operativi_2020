@@ -6,9 +6,15 @@
 
 #pragma once
 
+/**
+ * Appends the node to list, double linking it.
+ *
+ * @param list The list
+ * @param node Node to append
+ */
 #define append_list_positions(list, node)                                      \
   node->prev = list->tail;                                                     \
-  list->tail->next = node;                                                           \
+  list->tail->next = node;                                                     \
   list->tail = node;
 
 /*
@@ -22,18 +28,18 @@ typedef struct vec_2 {
 /*
  * Node fore double linked list for positions
  */
-typedef struct node_position {
+typedef struct node_positions {
   vec_2 value[5];
-  struct node_position *next;
-  struct node_position *prev;
+  struct node_positions *next;
+  struct node_positions *prev;
 } node_positions;
 
 /*
  * Node fore double linked list for positions
  */
 typedef struct list_positions {
-  struct node_position *head;
-  struct node_position *tail;
+  struct node_positions *head;
+  struct node_positions *tail;
 } list_positions;
 
 /*

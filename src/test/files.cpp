@@ -53,7 +53,7 @@ extern "C" {
 TEST(parse_position_str, ok) {
   vec_2 expected[5] = {{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 2}};
   char str[] = "0,0|1,0|2,0|0,1|1,2";
-  node_position *positions = parse_position_str(str);
+  node_positions *positions = parse_position_str(str);
   ASSERT_TRUE(positions != NULL);
   ASSERT_TRUE(positions->next == NULL);
   ASSERT_TRUE(positions->prev == NULL);
@@ -69,7 +69,7 @@ TEST(parse_position_str, ok) {
  */
 TEST(parse_position_str, malformed) {
   char str[] = "0,0|1,0 20|0,11,";
-  node_position *positions = parse_position_str(str);
+  node_positions *positions = parse_position_str(str);
   ASSERT_TRUE(positions == NULL);
 }
 
@@ -78,7 +78,7 @@ TEST(parse_position_str, malformed) {
  */
 TEST(parse_position_str, malformed_lenght_ok_null_position) {
   char str[] = "0,0|1,0|2,0||1,1|1,2";
-  node_position *positions = parse_position_str(str);
+  node_positions *positions = parse_position_str(str);
   ASSERT_TRUE(positions == NULL);
 }
 
@@ -87,7 +87,7 @@ TEST(parse_position_str, malformed_lenght_ok_null_position) {
  */
 TEST(parse_position_str, malformed_length_ok_4_positions) {
   char str[] = "|0,0|1,0|2,0|||||1,2";
-  node_position *positions = parse_position_str(str);
+  node_positions *positions = parse_position_str(str);
   ASSERT_TRUE(positions == NULL);
 }
 
@@ -96,7 +96,7 @@ TEST(parse_position_str, malformed_length_ok_4_positions) {
  */
 TEST(parse_position_str, malformed_length_ok_commas) {
   char str[] = "0,0,1,0|2,0|0,1|1,2";
-  node_position *positions = parse_position_str(str);
+  node_positions *positions = parse_position_str(str);
   ASSERT_TRUE(positions == NULL);
 }
 
@@ -104,7 +104,7 @@ TEST(parse_position_str, malformed_length_ok_commas) {
  * Test null string
  */
 TEST(parse_position_str, null) {
-  node_position *positions = parse_position_str(NULL);
+  node_positions *positions = parse_position_str(NULL);
   ASSERT_TRUE(positions == NULL);
 }
 
