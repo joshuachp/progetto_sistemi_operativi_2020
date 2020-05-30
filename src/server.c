@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
   }
   char *file = argv[2];
   // XXX: Testing
-  vec_2 **positions = read_positions_file(file);
+  list_positions *positions = read_positions_file(file);
 
   // Signals setup
   setup_sig_handler();

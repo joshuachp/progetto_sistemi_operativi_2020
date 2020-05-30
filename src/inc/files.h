@@ -11,9 +11,9 @@
  * Read the position file passed to the server.
  *
  * @param filename Path to the file to read
- * @return A matrix of 5 vec_2 with NUll at the end, NULL on error
+ * @return A list of position, NULL on error
  */
-vec_2 **read_positions_file(char *filename);
+list_positions *read_positions_file(char *filename);
 
 /**
  * Parse a string into an array of 5 vec_2
@@ -31,4 +31,3 @@ node_positions *parse_position_str(char *);
  * @return Next line in buffer
  */
 char *get_next_line_buf(char *, size_t);
-

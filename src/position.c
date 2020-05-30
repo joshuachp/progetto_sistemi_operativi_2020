@@ -15,10 +15,11 @@ uint8_t distance_sqr(vec_2 a, vec_2 b) {
 }
 
 list_positions *create_list_positions(node_positions *head,
-                                      node_positions *tail) {
+                                      node_positions *tail, size_t length) {
   list_positions *list = malloc(sizeof(list_positions));
   list->head = head;
   list->tail = tail;
+  list->length = length;
   return list;
 }
 

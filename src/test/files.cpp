@@ -7,30 +7,28 @@ extern "C" {
 #include "files.h"
 }
 
-// /**
-//  * Test on the position input file
-//  */
-// TEST(read_positions_file, input) {
-//   vec_2 expected[5][5] = {{{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 2}},
-//                           {{0, 0}, {1, 0}, {3, 0}, {0, 2}, {1, 2}},
-//                           {{0, 0}, {2, 0}, {4, 0}, {0, 2}, {1, 2}},
-//                           {{0, 1}, {3, 0}, {5, 0}, {0, 3}, {1, 2}},
-//                           {{0, 2}, {3, 0}, {5, 0}, {0, 4}, {1, 2}}};
-//   char filename[] = "../input/file_posizioni.txt";
-//   vec_2 **positions = read_positions_file(filename);
-//   ASSERT_TRUE(positions != NULL);
-//   size_t p_length = 0;
-//   while (positions[p_length] != NULL) {
-//     p_length++;
-//   }
-//   ASSERT_EQ(5, p_length);
-//   for (int i = 0; i < 5; i++) {
-//     for (int j = 0; j < 5; j++) {
-//       ASSERT_EQ(expected[i][j].i, positions[i][j].i);
-//       ASSERT_EQ(expected[i][j].j, positions[i][j].j);
-//     }
-//   }
-// }
+/**
+ * Test on the position input file
+ */
+TEST(read_positions_file, input) {
+  vec_2 expected[5][5] = {{{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 2}},
+                          {{0, 0}, {1, 0}, {3, 0}, {0, 2}, {1, 2}},
+                          {{0, 0}, {2, 0}, {4, 0}, {0, 2}, {1, 2}},
+                          {{0, 1}, {3, 0}, {5, 0}, {0, 3}, {1, 2}},
+                          {{0, 2}, {3, 0}, {5, 0}, {0, 4}, {1, 2}}};
+  char filename[] = "../input/file_posizioni.txt";
+  list_positions *positions = read_positions_file(filename);
+  ASSERT_TRUE(positions != NULL);
+  node_positions *node = positions->head;
+  ASSERT_EQ(5, positions->length);
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 5; j++) {
+      ASSERT_EQ(expected[i][j].i, node->value[j].i);
+      ASSERT_EQ(expected[i][j].j, node->value[j].j);
+    }
+    node = node->next;
+  }
+}
 
 //
 // /**

@@ -15,8 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// FIXME: Complete implementation
-vec_2 **read_positions_file(char *filename) {
+list_positions *read_positions_file(char *filename) {
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
@@ -28,7 +27,7 @@ vec_2 **read_positions_file(char *filename) {
     err_exit("Error fstat");
 
   // Check size if null return
-  if (sb.st_size = 0) 
+  if (sb.st_size == 0)
     return NULL;
 
   // Map file to buff
@@ -43,17 +42,26 @@ vec_2 **read_positions_file(char *filename) {
     err_exit("Error close");
 
   // Create positions list
-  list_positions *positions = create_list_positions(NULL, NULL);
+  list_positions *positions = create_list_positions(NULL, NULL, 0);
 
   // Lines
   size_t index = 0;
   char *line;
+  node_positions *node;
   while (index != sb.st_size) {
     line = get_next_line_buf(buf, index);
 
     // Parse line
+    node = parse_position_str(line);
+    if (node == NULL) {
+      free(line);
+      munmap(buf, sb.st_size + 1);
+      free_list_positions(positions);
+      return NULL;
+    }
 
-    // TODO: Add to positions
+    // Append to positions
+    append_list_positions(positions, node);
 
     // Next line
     index += strlen(line + 1);
@@ -64,7 +72,7 @@ vec_2 **read_positions_file(char *filename) {
   }
 
   munmap(buf, sb.st_size + 1);
-  return NULL;
+  return positions;
 }
 
 char *get_next_line_buf(char *buf, size_t start) {

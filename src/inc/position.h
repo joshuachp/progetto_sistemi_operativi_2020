@@ -3,6 +3,7 @@
 ///        sulla scacchiera
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #pragma once
 
@@ -15,7 +16,8 @@
 #define append_list_positions(list, node)                                      \
   node->prev = list->tail;                                                     \
   list->tail->next = node;                                                     \
-  list->tail = node;
+  list->tail = node;\
+  list->length++;
 
 /*
  * Struct for the tuple of position on the board
@@ -40,6 +42,7 @@ typedef struct node_positions {
 typedef struct list_positions {
   struct node_positions *head;
   struct node_positions *tail;
+  size_t length;
 } list_positions;
 
 /*
@@ -53,13 +56,15 @@ uint8_t distance_sqr(vec_2 arg1, vec_2 arg2);
 
 /*
  * Allocate ad initialize a list of positions
+ * XXX: Adding more control over the list probably never using it
  *
  * @param head The head of the list
  * @param tail The tail of the list
+ * @param length The length of the list
  * @return Pointer to the allocated list
  */
 list_positions *create_list_positions(node_positions *head,
-                                      node_positions *tail);
+                                      node_positions *tail, size_t length);
 
 /*
  * Free a list of positions, it will free each node and value
