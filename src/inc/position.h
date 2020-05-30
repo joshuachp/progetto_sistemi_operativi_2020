@@ -6,6 +6,11 @@
 
 #pragma once
 
+#define append_list_positions(list, node)                                      \
+  node->prev = list->tail;                                                     \
+  list->tail->next = node;                                                           \
+  list->tail = node;
+
 /*
  * Struct for the tuple of position on the board
  */
@@ -56,4 +61,3 @@ list_positions *create_list_positions(node_positions *head,
  * @param list List to free
  */
 void free_list_positions(list_positions *list);
-

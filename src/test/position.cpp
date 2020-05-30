@@ -47,6 +47,7 @@ TEST(create_list_positions, value) {
   ASSERT_EQ(list->head->value[0].i, 0);
   ASSERT_EQ(list->head->value[0].j, 1);
 }
+
 /*
  * Test creation of positions list
  */
@@ -59,4 +60,22 @@ TEST(free_list_positions, base) {
   list_positions *list = create_list_positions(node, node);
   ASSERT_TRUE(list->head != NULL);
   ASSERT_NO_THROW(free_list_positions(list));
+}
+
+/*
+ * Test append of positions list
+ */
+TEST(append_list_positions, ok) {
+  node_position node_stack = {.value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
+                              .next = NULL,
+                              .prev = NULL};
+  node_position *node1 = (node_position *)malloc(sizeof(node_position));
+  node_position *node2 = (node_position *)malloc(sizeof(node_position));
+  std::memcpy(node1, &node_stack, sizeof(node_position));
+  std::memcpy(node2, &node_stack, sizeof(node_position));
+  list_positions *list = create_list_positions(node1, node1);
+  append_list_positions(list, node2);
+  ASSERT_EQ(list->tail, node2);
+  ASSERT_EQ(list->head->next, node2);
+  free_list_positions(list);
 }

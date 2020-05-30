@@ -26,6 +26,11 @@ vec_2 **read_positions_file(char *filename) {
   struct stat sb;
   if (fstat(fd, &sb) == -1)
     err_exit("Error fstat");
+
+  // Check size if null return
+  if (sb.st_size = 0) 
+    return NULL;
+
   // Map file to buff
   char *buf =
       mmap(NULL, sb.st_size + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
@@ -37,7 +42,8 @@ vec_2 **read_positions_file(char *filename) {
   if (close(fd) == -1)
     err_exit("Error close");
 
-  // Posizioni
+  // Create positions list
+  list_positions *positions = create_list_positions(NULL, NULL);
 
   // Lines
   size_t index = 0;
