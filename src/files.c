@@ -83,16 +83,22 @@ char *get_next_line_buf(char *buf, size_t start) {
   return ret;
 }
 
-vec_2 *parse_position_str(char *str) {
+node_positions *parse_position_str(char *str) {
   if (str == 0 || strlen(str) != 19) {
     return NULL;
   }
-  vec_2 *ret = malloc(sizeof(vec_2) * 5);
+  node_positions *node = malloc(sizeof(node_positions));
+  // Use sscanf to parse the whole string, the format is 8 bit unsigned int
   int check = sscanf(str, "%hhu,%hhu|%hhu,%hhu|%hhu,%hhu|%hhu,%hhu|%hhu,%hhu",
-                     &ret[0].i, &ret[0].j, &ret[1].i, &ret[1].j, &ret[2].i,
-                     &ret[2].j, &ret[3].i, &ret[3].j, &ret[4].i, &ret[4].j);
+                     &node->value[0].i, &node->value[0].j, &node->value[1].i,
+                     &node->value[1].j, &node->value[2].i, &node->value[2].j,
+                     &node->value[3].i, &node->value[3].j, &node->value[4].i,
+                     &node->value[4].j);
   if (check != 10) {
+    free(node);
     return NULL;
   }
-  return ret;
+  node->next = NULL;
+  node->prev = NULL;
+  return node;
 }

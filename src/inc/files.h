@@ -21,7 +21,7 @@ vec_2 **read_positions_file(char *filename);
  * @param str Sting to split
  * @return Array of 5 vec_2, NULL on error
  */
-vec_2 *parse_position_str(char *);
+node_positions *parse_position_str(char *);
 
 /**
  * Transform a string buf in an array of strings for each line in the bug.
