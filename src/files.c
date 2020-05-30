@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// FIXME: Complete implementation
 vec_2 **read_positions_file(char *filename) {
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
@@ -37,10 +38,6 @@ vec_2 **read_positions_file(char *filename) {
     err_exit("Error close");
 
   // Posizioni
-  vec_2 **positions = malloc(sizeof(vec_2 *));
-  size_t p_length = 0;
-  positions[p_length] = NULL;
-  vec_2 *array;
 
   // Lines
   size_t index = 0;
@@ -49,13 +46,8 @@ vec_2 **read_positions_file(char *filename) {
     line = get_next_line_buf(buf, index);
 
     // Parse line
-    array = parse_position_str(line);
 
-    // add to positions
-    positions = realloc(positions, p_length + 1*sizeof(vec_2*));
-    positions[p_length] = array;
-    p_length++;
-    positions[p_length] = NULL;
+    // TODO: Add to positions
 
     // Next line
     index += strlen(line + 1);
@@ -66,7 +58,7 @@ vec_2 **read_positions_file(char *filename) {
   }
 
   munmap(buf, sb.st_size + 1);
-  return positions;
+  return NULL;
 }
 
 char *get_next_line_buf(char *buf, size_t start) {
@@ -77,13 +69,16 @@ char *get_next_line_buf(char *buf, size_t start) {
   }
 
   // Find next new line
-  char *end;
-  end = strchr(str, '\n');
-  if (end != NULL)
-    *end = 0;
+  char *end = str;
+  while (*end != 0 && *end != '\n')
+    end += 1;
 
+  // Copy the string
   char *ret = malloc(sizeof(char) * (end - str));
+  char t = *end;
+  *end = 0;
   ret = strcpy(ret, str);
+  *end = t;
 
   return ret;
 }

@@ -19,7 +19,7 @@ typedef struct {
   int message_id;
   char message[256];
   double max_distance;
-} message_ds;
+} Message;
 
 /**
  * Acknowledgement saved in the shared memory
@@ -30,4 +30,4 @@ typedef struct {
   pid_t pid_receiver;
   int message_id;
   time_t timestamp;
-} acknowledgment_ds;
+} Acknowledgment;
