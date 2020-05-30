@@ -48,8 +48,14 @@ list_positions *read_positions_file(char *filename) {
   size_t index = 0;
   char *line;
   node_positions *node;
-  while (index != sb.st_size) {
+  while (index != sb.st_size && buf[index] != 0) {
     line = get_next_line_buf(buf, index);
+    if (node == NULL) {
+      free(line);
+      munmap(buf, sb.st_size + 1);
+      free_list_positions(positions);
+      return NULL;
+    }
 
     // Parse line
     node = parse_position_str(line);
@@ -64,7 +70,7 @@ list_positions *read_positions_file(char *filename) {
     append_list_positions(positions, node);
 
     // Next line
-    index += strlen(line + 1);
+    index += strlen(line) + 1;
 
     // Exit while
     free(line);
@@ -79,6 +85,7 @@ char *get_next_line_buf(char *buf, size_t start) {
   // Get starting string
   char *str = &buf[start];
   if (str == 0) {
+    fputs("Error get_next_line_buf: string is empty", stderr);
     return NULL;
   }
 
@@ -99,6 +106,7 @@ char *get_next_line_buf(char *buf, size_t start) {
 
 node_positions *parse_position_str(char *str) {
   if (str == 0 || strlen(str) != 19) {
+    fputs("Error parse_position_str: wrong string length", stderr);
     return NULL;
   }
   node_positions *node = malloc(sizeof(node_positions));
@@ -109,6 +117,7 @@ node_positions *parse_position_str(char *str) {
                      &node->value[3].i, &node->value[3].j, &node->value[4].i,
                      &node->value[4].j);
   if (check != 10) {
+    fputs("Error parse_position_str: string malformed", stderr);
     free(node);
     return NULL;
   }

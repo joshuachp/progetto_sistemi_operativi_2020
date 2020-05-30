@@ -84,3 +84,21 @@ TEST(append_list_positions, ok) {
   ASSERT_EQ(list->head->next, node2);
   free_list_positions(list);
 }
+
+/*
+ * Test append of positions list
+ */
+TEST(append_list_positions, null_list) {
+  node_positions node_stack = {
+      .value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
+      .next = NULL,
+      .prev = NULL};
+  node_positions *node = (node_positions *)malloc(sizeof(node_positions));
+  std::memcpy(node, &node_stack, sizeof(node_positions));
+  list_positions *list = create_list_positions(NULL, NULL, 0);
+  append_list_positions(list, node);
+  ASSERT_EQ(1, list->length);
+  ASSERT_EQ(list->tail, node);
+  ASSERT_EQ(list->head, node);
+  free_list_positions(list);
+}

@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
   char *file = argv[2];
   // XXX: Testing
   list_positions *positions = read_positions_file(file);
+  free_list_positions(positions);
 
   // Signals setup
   setup_sig_handler();

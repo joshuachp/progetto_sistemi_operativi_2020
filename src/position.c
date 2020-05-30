@@ -36,3 +36,16 @@ void free_list_positions(list_positions *list) {
   free(list);
   list = NULL;
 }
+
+void append_list_positions(list_positions *list, node_positions *node) {
+  if (list->tail != NULL) {
+    node->prev = list->tail;
+    list->tail->next = node;
+    list->tail = node;
+    list->length++;
+  } else {
+    list->head = node;
+    list->tail = node;
+    list->length = 1;
+  }
+}

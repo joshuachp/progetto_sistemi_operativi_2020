@@ -19,8 +19,8 @@ TEST(read_positions_file, input) {
   char filename[] = "../input/file_posizioni.txt";
   list_positions *positions = read_positions_file(filename);
   ASSERT_TRUE(positions != NULL);
-  node_positions *node = positions->head;
   ASSERT_EQ(5, positions->length);
+  node_positions *node = positions->head;
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 5; j++) {
       ASSERT_EQ(expected[i][j].i, node->value[j].i);
@@ -30,20 +30,15 @@ TEST(read_positions_file, input) {
   }
 }
 
-//
-// /**
-//  * Test on the position with big input file
-//  */
-// TEST(read_positions_file, input_big) {
-//   char filename[] = "../input/big_file_posizioni.txt";
-//   vec_2 **positions = read_positions_file(filename);
-//   ASSERT_TRUE(positions != NULL);
-//   size_t p_length = 0;
-//   while (positions[p_length] != NULL) {
-//     p_length++;
-//   }
-//   ASSERT_EQ(5, p_length);
-// }
+/**
+ * Test on the position with big input file
+ */
+TEST(read_positions_file, input_big) {
+  char filename[] = "../input/big_file_posizioni.txt";
+  list_positions *positions = read_positions_file(filename);
+  ASSERT_TRUE(positions != NULL);
+  ASSERT_EQ(526, positions->length);
+}
 
 /**
  * Test string to position array

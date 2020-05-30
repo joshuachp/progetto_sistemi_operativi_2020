@@ -7,18 +7,6 @@
 
 #pragma once
 
-/**
- * Appends the node to list, double linking it.
- *
- * @param list The list
- * @param node Node to append
- */
-#define append_list_positions(list, node)                                      \
-  node->prev = list->tail;                                                     \
-  list->tail->next = node;                                                     \
-  list->tail = node;\
-  list->length++;
-
 /*
  * Struct for the tuple of position on the board
  */
@@ -72,3 +60,12 @@ list_positions *create_list_positions(node_positions *head,
  * @param list List to free
  */
 void free_list_positions(list_positions *list);
+
+/**
+ * Appends the node to list, double linking it. Node should have next and prev
+ * set to NULL.
+ *
+ * @param list The list
+ * @param node Node to append
+ */
+void append_list_positions(list_positions *list, node_positions *node);
