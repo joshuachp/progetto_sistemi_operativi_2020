@@ -13,6 +13,7 @@ set( SERVER_SRC
   src/semaphore.c
   src/fifo.c
   src/position.c
+  src/files.c
 )
 
 include_directories(src/inc)
@@ -59,5 +60,5 @@ file(GLOB TESTS_SRC "src/test/*.cpp")
 
 add_executable(tests ${TESTS_SRC} ${CLIENT_SRC} ${SERVER_SRC})
 target_link_libraries(tests gtest_main)
-# add_test(NAME tests_all COMMAND tests)
-gtest_add_tests(TARGET tests)
+gtest_add_tests(TARGET tests TEST_LIST test_all)
+set_tests_properties(${test_all} PROPERTIES TIMEOUT 10)

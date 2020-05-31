@@ -4,6 +4,8 @@
 #include "defines.h"
 #include "err_exit.h"
 #include "fifo.h"
+#include "files.h"
+#include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
 #include <signal.h>
@@ -31,12 +33,15 @@ void setup_sig_handler();
 
 int main(int argc, char *argv[]) {
 
-  uint32_t KEY;
-  if (argc != 3 || sscanf(argv[1], "%u", &KEY) != 1) {
+  uint32_t key;
+  if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
     print_help();
     return 1;
   }
-  char *FILE = argv[3];
+  char *file = argv[2];
+  // XXX: Testing
+  list_positions *positions = read_positions_file(file);
+  free_list_positions(positions);
 
   // Signals setup
   setup_sig_handler();
@@ -88,3 +93,4 @@ void setup_sig_handler() {
     err_exit("sigaction");
 #endif
 }
+
