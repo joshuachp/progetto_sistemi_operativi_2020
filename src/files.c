@@ -6,7 +6,6 @@
 #include "err_exit.h"
 #include "position.h"
 #include <fcntl.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +15,8 @@
 #include <unistd.h>
 
 list_positions *read_positions_file(char *filename) {
-#ifndef NDEBUG
+  // TODO: Change back to ifndef
+#ifdef NDEBUG
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
@@ -53,7 +53,7 @@ list_positions *read_positions_file(char *filename) {
   node_positions *node;
   while (index != sb.st_size && buf[index] != 0) {
     line = get_next_line_buf(buf, &index);
-    if (node == NULL) {
+    if (line == NULL) {
       free(line);
       munmap(buf, sb.st_size + 1);
       free_list_positions(positions);
@@ -81,6 +81,91 @@ list_positions *read_positions_file(char *filename) {
   }
 
   munmap(buf, sb.st_size + 1);
+  return positions;
+#else
+  // Buffer
+  int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
+  if (fd == -1) {
+    err_exit("open");
+  }
+  // File stats
+  struct stat sb;
+  if (fstat(fd, &sb) == -1)
+    err_exit("Error fstat");
+
+  // Check size if null return
+  if (sb.st_size == 0) {
+    fputs("Error stat: file is empy", stderr);
+    return NULL;
+  }
+
+  // Map file to buff
+  char *buf = malloc(sizeof(char) * BUF_READ_SIZE);
+
+  // Create positions list
+  list_positions *positions = create_list_positions(NULL, NULL, 0);
+
+  // Lines
+  size_t index;
+  size_t n_index;
+
+  char *line;
+  node_positions *node;
+
+  size_t b_read = read(fd, buf, BUF_READ_SIZE - 1);
+  while (b_read != 0) {
+    // Make buf a string
+    buf[b_read] = 0;
+
+    index = 0;
+    n_index = 0;
+
+    while (n_index < b_read) {
+      line = get_next_line_buf(buf, &n_index);
+      if (line == NULL) {
+        free(line);
+        free(buf);
+        free_list_positions(positions);
+        return NULL;
+      }
+
+      // If there is more to read but reached the last index
+      if (n_index < sb.st_size && n_index >= b_read) {
+        if (lseek(fd, index, SEEK_SET) == -1) {
+          free(line);
+          free(buf);
+          free_list_positions(positions);
+          err_exit("seek");
+        }
+        free(line);
+        break;
+      }
+
+      // Parse line
+      node = parse_position_str(line);
+      if (node == NULL) {
+        free(line);
+        free(buf);
+        free_list_positions(positions);
+        return NULL;
+      }
+
+      // Append to positions
+      append_list_positions(positions, node);
+
+      // Next line
+      n_index += 1;
+      index = n_index;
+
+      free(line);
+      line = NULL;
+    }
+
+    // Exit while
+    b_read = read(fd, buf, BUF_READ_SIZE - 1);
+  }
+
+  free(buf);
   return positions;
 #endif
 }
