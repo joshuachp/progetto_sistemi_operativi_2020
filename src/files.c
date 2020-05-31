@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 list_positions *read_positions_file(char *filename) {
-  // TODO: Change back to ifndef
+  // XXX: mmap to read file has better performance but is more unstable
   // Use mmap instrad of read
 #ifdef NDEBUG
   // Buffer
