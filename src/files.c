@@ -16,6 +16,7 @@
 
 list_positions *read_positions_file(char *filename) {
   // TODO: Change back to ifndef
+  // Use mmap instrad of read
 #ifdef NDEBUG
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
@@ -101,6 +102,7 @@ list_positions *read_positions_file(char *filename) {
 
   // Map file to buff
   char *buf = malloc(sizeof(char) * BUF_READ_SIZE);
+  size_t file_read = 0;
 
   // Create positions list
   list_positions *positions = create_list_positions(NULL, NULL, 0);
@@ -116,6 +118,7 @@ list_positions *read_positions_file(char *filename) {
   while (b_read != 0) {
     // Make buf a string
     buf[b_read] = 0;
+    file_read += b_read;
 
     index = 0;
     n_index = 0;
@@ -129,15 +132,14 @@ list_positions *read_positions_file(char *filename) {
         return NULL;
       }
 
-      // If there is more to read but reached the last index
-      if (n_index < sb.st_size && n_index >= b_read) {
-        if (lseek(fd, index, SEEK_SET) == -1) {
+      if (n_index >= b_read && file_read < sb.st_size) {
+        file_read -= n_index - index;
+        if (lseek(fd, file_read, SEEK_SET) == -1) {
           free(line);
           free(buf);
           free_list_positions(positions);
-          err_exit("seek");
+          err_exit("lseek");
         }
-        free(line);
         break;
       }
 
