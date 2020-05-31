@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 list_positions *read_positions_file(char *filename) {
+#ifndef NDEBUG
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
@@ -27,8 +28,10 @@ list_positions *read_positions_file(char *filename) {
     err_exit("Error fstat");
 
   // Check size if null return
-  if (sb.st_size == 0)
+  if (sb.st_size == 0) {
+    fputs("Error stat: file is empy", stderr);
     return NULL;
+  }
 
   // Map file to buff
   char *buf =
@@ -49,7 +52,7 @@ list_positions *read_positions_file(char *filename) {
   char *line;
   node_positions *node;
   while (index != sb.st_size && buf[index] != 0) {
-    line = get_next_line_buf(buf, index);
+    line = get_next_line_buf(buf, &index);
     if (node == NULL) {
       free(line);
       munmap(buf, sb.st_size + 1);
@@ -70,7 +73,7 @@ list_positions *read_positions_file(char *filename) {
     append_list_positions(positions, node);
 
     // Next line
-    index += strlen(line) + 1;
+    index += 1;
 
     // Exit while
     free(line);
@@ -79,11 +82,12 @@ list_positions *read_positions_file(char *filename) {
 
   munmap(buf, sb.st_size + 1);
   return positions;
+#endif
 }
 
-char *get_next_line_buf(char *buf, size_t start) {
+char *get_next_line_buf(char *buf, size_t *index) {
   // Get starting string
-  char *str = &buf[start];
+  char *str = &buf[*index];
   if (str == 0) {
     fputs("Error get_next_line_buf: string is empty", stderr);
     return NULL;
@@ -91,8 +95,10 @@ char *get_next_line_buf(char *buf, size_t start) {
 
   // Find next new line
   char *end = str;
-  while (*end != 0 && *end != '\n')
+  while (*end != 0 && *end != '\n') {
+    (*index) += 1;
     end += 1;
+  }
 
   // Copy the string
   char *ret = malloc(sizeof(char) * (end - str));

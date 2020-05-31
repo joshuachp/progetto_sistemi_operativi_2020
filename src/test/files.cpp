@@ -112,10 +112,10 @@ TEST(get_next_line_buf, ok) {
   size_t start = 0;
   char *line;
   for (int i = 0; i < 3; i++) {
-    line = get_next_line_buf(buf, start);
+    line = get_next_line_buf(buf, &start);
     ASSERT_TRUE(line != NULL);
     ASSERT_TRUE(expected[i].compare(std::string(line)) == 0);
-    start += strlen(line) + 1;
+    start += 1;
     free(line);
     line = NULL;
   }
@@ -132,10 +132,10 @@ TEST(get_next_line_buf, new_line_end) {
   size_t start = 0;
   char *line;
   for (int i = 0; i < 3; i++) {
-    line = get_next_line_buf(buf, start);
+    line = get_next_line_buf(buf, &start);
     ASSERT_TRUE(line != NULL);
     ASSERT_TRUE(expected[i].compare(std::string(line)) == 0);
-    start += strlen(line) + 1;
+    start += 1;
     free(line);
     line = NULL;
   }
@@ -153,9 +153,9 @@ TEST(get_next_line_buf, double_new_line_end) {
   size_t start = 0;
   char *line;
   for (int i = 0; i < 4; i++) {
-    line = get_next_line_buf(buf, start);
+    line = get_next_line_buf(buf, &start);
     ASSERT_TRUE(expected[i].compare(std::string(line)) == 0);
-    start += strlen(line) + 1;
+    start += 1;
     free(line);
     line = NULL;
   }
@@ -174,9 +174,9 @@ TEST(get_next_line_buf, double_new_line_beginning) {
   size_t start = 0;
   char *line;
   for (int i = 0; i < 5; i++) {
-    line = get_next_line_buf(buf, start);
+    line = get_next_line_buf(buf, &start);
     ASSERT_TRUE(expected[i].compare(std::string(line)) == 0);
-    start += strlen(line) + 1;
+    start += 1;
     free(line);
     line = NULL;
   }

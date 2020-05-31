@@ -27,7 +27,7 @@ node_positions *parse_position_str(char *);
  * Transform a string buf in an array of strings for each line in the bug.
  *
  * @param buf The buffer string
- * @param start The buffer string
+ * @param index The buffer string
  * @return Next line in buffer
  */
-char *get_next_line_buf(char *, size_t);
+char *get_next_line_buf(char *buf, size_t *index);
