@@ -7,6 +7,7 @@ set( CLIENT_SRC
   src/position.c
 )
 set( SERVER_SRC
+  src/server_lib.c
   src/err_exit.c
   src/defines.c
   src/shared_memory.c

@@ -15,9 +15,11 @@
 #include <unistd.h>
 
 list_positions *read_positions_file(char *filename) {
-  // XXX: mmap to read file has better performance but is more unstable
-  // Use mmap instrad of read
-#ifdef NDEBUG
+  // XXX: mmap to read file has better performance but is more unstable. We
+  // could also use the information of the file size to read the file in one go
+  // but it will have the same effect of the mmap.
+  // Use read in release
+#ifndef NDEBUG
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
