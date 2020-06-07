@@ -4,6 +4,13 @@
 
 #pragma once
 
+// Board shared memory id
+int shmid_board;
+// Acknowledgment shared memory id
+int shmid_ack;
+// Semaphore set id
+int semid;
+
 /*
  * Prints the help for the binary
  */
@@ -21,3 +28,8 @@ void termination_handler(int);
  * Setup signal handling for the application
  */
 void setup_sig_handler();
+
+/**
+ * Setup up the shared memories and semaphores
+ */
+void setUpServer();

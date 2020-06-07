@@ -3,10 +3,16 @@
 ///         il testing.
 
 #include "server_lib.h"
+#include "defines.h"
 #include "err_exit.h"
+#include "semaphore.h"
+#include "shared_memory.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/sem.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 void print_help(void) {
   puts("Usage:\n"
@@ -16,7 +22,14 @@ void print_help(void) {
 }
 
 void termination_handler(int signum) {
-  // TODO: Terminate beautifully
+  // TODO
+  // Remove board shared memory
+  remove_shared_memory(shmid_board);
+  // Remove acknowledgement shared memory
+  remove_shared_memory(shmid_ack);
+  // Remove semaphore set
+  if (semctl(semid, 0, IPC_RMID, 0) == -1)
+    err_exit("semctl IPC_RMID");
   exit(0);
 }
 
@@ -51,4 +64,26 @@ void setup_sig_handler() {
   if (sigaction(SIGINT, &action, NULL) == -1)
     err_exit("sigaction");
 #endif
+}
+
+void setUpServer() {
+  // Create shared memory board, create a 10*10 int data segment that will be
+  // accessible throw pointer arithmetics
+  shmid_board =
+      alloc_shared_memory(IPC_PRIVATE, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
+  // Create shared memory acknowledgement
+  shmid_ack = alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * 5);
+  // Create 7 semaphores and initialize it
+  semid = semget(IPC_PRIVATE, 4, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
+  if (semid == -1)
+    err_exit("semget");
+
+  // Initialize the semaphore set with semctl
+  // TODO: Check sem values
+  unsigned short semInitVal[] = {0, 0, 0, 0, 0, 0, 0};
+  union semun arg;
+  arg.array = semInitVal;
+
+  if (semctl(semid, 0, SETALL, arg) == -1)
+    err_exit("semctl SETALL");
 }
