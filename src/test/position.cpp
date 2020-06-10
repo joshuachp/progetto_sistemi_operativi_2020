@@ -38,9 +38,7 @@ TEST(create_list_positions, base) {
  * Test creation of positions list
  */
 TEST(create_list_positions, value) {
-  node_positions node = {.value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-                         .next = NULL,
-                         .prev = NULL};
+  node_positions node = {{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, NULL, NULL};
   list_positions *list = create_list_positions(&node, &node, 1);
   ASSERT_TRUE(list->head != NULL);
   ASSERT_TRUE(list->head->next == NULL);
@@ -55,9 +53,7 @@ TEST(create_list_positions, value) {
  */
 TEST(free_list_positions, base) {
   node_positions node_stack = {
-      .value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-      .next = NULL,
-      .prev = NULL};
+      {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, NULL, NULL};
   node_positions *node = (node_positions *)malloc(sizeof(node_positions));
   std::memcpy(node, &node_stack, sizeof(node_positions));
   list_positions *list = create_list_positions(node, node, 1);
@@ -70,9 +66,7 @@ TEST(free_list_positions, base) {
  */
 TEST(append_list_positions, ok) {
   node_positions node_stack = {
-      .value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-      .next = NULL,
-      .prev = NULL};
+      {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, NULL, NULL};
   node_positions *node1 = (node_positions *)malloc(sizeof(node_positions));
   node_positions *node2 = (node_positions *)malloc(sizeof(node_positions));
   std::memcpy(node1, &node_stack, sizeof(node_positions));
@@ -90,9 +84,7 @@ TEST(append_list_positions, ok) {
  */
 TEST(append_list_positions, null_list) {
   node_positions node_stack = {
-      .value = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}},
-      .next = NULL,
-      .prev = NULL};
+      {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, NULL, NULL};
   node_positions *node = (node_positions *)malloc(sizeof(node_positions));
   std::memcpy(node, &node_stack, sizeof(node_positions));
   list_positions *list = create_list_positions(NULL, NULL, 0);

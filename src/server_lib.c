@@ -5,6 +5,7 @@
 #include "server_lib.h"
 #include "defines.h"
 #include "err_exit.h"
+#include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
 #include <signal.h>
@@ -14,6 +15,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+int shmid_board;
+int shmid_ack;
+int semid;
+
 void print_help(void) {
   puts("Usage:\n"
        "  server KEY FILE\n"
@@ -22,15 +27,21 @@ void print_help(void) {
 }
 
 void termination_handler(int signum) {
-  // TODO
-  // Remove board shared memory
-  remove_shared_memory(shmid_board);
-  // Remove acknowledgement shared memory
-  remove_shared_memory(shmid_ack);
-  // Remove semaphore set
-  if (semctl(semid, 0, IPC_RMID, 0) == -1)
-    err_exit("semctl IPC_RMID");
-  exit(0);
+  // XXX: Remove warning of unused signum
+  switch (signum) {
+    case SIGTERM:
+#ifndef NDEBUG
+    case SIGINT:
+#endif
+      // Remove board shared memory
+      remove_shared_memory(shmid_board);
+      // Remove acknowledgement shared memory
+      remove_shared_memory(shmid_ack);
+      // Remove semaphore set
+      if (semctl(semid, 0, IPC_RMID, 0) == -1)
+        err_exit("semctl IPC_RMID");
+      exit(0);
+  }
 }
 
 void setup_sig_handler() {
@@ -66,24 +77,38 @@ void setup_sig_handler() {
 #endif
 }
 
-void setUpServer() {
+void set_up_server() {
   // Create shared memory board, create a 10*10 int data segment that will be
   // accessible throw pointer arithmetics
   shmid_board =
       alloc_shared_memory(IPC_PRIVATE, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
   // Create shared memory acknowledgement
-  shmid_ack = alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * 5);
+  shmid_ack =
+      alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * DEVICE_NUMBER);
   // Create 7 semaphores and initialize it
   semid = semget(IPC_PRIVATE, 4, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
   if (semid == -1)
     err_exit("semget");
-
   // Initialize the semaphore set with semctl
   // TODO: Check sem values
   unsigned short semInitVal[] = {0, 0, 0, 0, 0, 0, 0};
   union semun arg;
   arg.array = semInitVal;
-
   if (semctl(semid, 0, SETALL, arg) == -1)
     err_exit("semctl SETALL");
+}
+
+void print_status(size_t step, pid_t devices[], node_positions *positions) {
+  printf("# Step %zu: device positions ########################\n", step);
+  for (int i = 0; i < DEVICE_NUMBER; i++) {
+    // TODO: Message list
+    printf("%u %hhu %hhu msgs: lista message_id\n", devices[i],
+           positions->value[i].i, positions->value[i].j);
+  }
+  puts("#############################################");
+}
+
+void server_process(list_positions *positions) {
+  // Waits two seconds
+  sleep(SLEEP_TIME);
 }

@@ -10,6 +10,8 @@
 #define BUF_READ_SIZE 256
 #define MIN_POSITIONS_ARRAY_LENGTH 6
 #define BOARD_SIZE 10
+#define DEVICE_NUMBER 5
+#define SLEEP_TIME 2
 
 /**
  * Messages sent from the clients to the devices

@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.7)
 
 project(progetto_sistemi_operativi)
 
+# Options
+add_compile_options(-Wall -Wextra -pedantic -fdiagnostics-color) 
+
 set( CLIENT_SRC
   src/defines.c
   src/position.c
@@ -63,3 +66,4 @@ add_executable(tests ${TESTS_SRC} ${CLIENT_SRC} ${SERVER_SRC})
 target_link_libraries(tests gtest_main)
 gtest_add_tests(TARGET tests TEST_LIST test_all)
 set_tests_properties(${test_all} PROPERTIES TIMEOUT 10)
+

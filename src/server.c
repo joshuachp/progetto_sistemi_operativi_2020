@@ -21,17 +21,39 @@ int main(int argc, char *argv[]) {
   }
   char *file = argv[2];
   list_positions *positions = read_positions_file(file);
-  free_list_positions(positions);
 
   // Signals setup
   setup_sig_handler();
 
   // Server setup
-  setUpServer();
+  set_up_server();
 
-  // fork ack manager
+  // Setup processes
+  pid_t pid;
+  pid_t *pid_devices = malloc(sizeof(pid_t) * DEVICE_NUMBER);
+  // Fork ack manager
+  pid = fork();
+  if (pid == -1)
+    err_exit("fork");
+  if (pid == 0) {
+    // ack manager
+  }
 
-  // fork childs
+  // Fork devices
+  for (int i = 0; i < 5; i++) {
+    pid = fork();
+    if (pid == -1)
+      err_exit("fork");
+    if (pid == 0) {
+      // device
+    }
+    pid_devices[i] = pid;
+  }
+
+  // server processes
+  server_process(positions);
+  free_list_positions(positions);
 
   return 0;
 }
+

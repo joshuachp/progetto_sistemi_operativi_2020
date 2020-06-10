@@ -2,6 +2,7 @@
 /// @brief Contiene la definizione delle funzioni e strutture per la posizione
 ///        sulla scacchiera
 
+#include "defines.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -19,7 +20,7 @@ typedef struct vec_2 {
  * Node fore double linked list for positions
  */
 typedef struct node_positions {
-  vec_2 value[5];
+  vec_2 value[DEVICE_NUMBER];
   struct node_positions *next;
   struct node_positions *prev;
 } node_positions;

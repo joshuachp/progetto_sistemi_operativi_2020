@@ -4,12 +4,15 @@
 
 #pragma once
 
+#include "position.h"
+#include <stdlib.h>
+
 // Board shared memory id
-int shmid_board;
+extern int shmid_board;
 // Acknowledgment shared memory id
-int shmid_ack;
+extern int shmid_ack;
 // Semaphore set id
-int semid;
+extern int semid;
 
 /*
  * Prints the help for the binary
@@ -32,4 +35,21 @@ void setup_sig_handler();
 /**
  * Setup up the shared memories and semaphores
  */
-void setUpServer();
+void set_up_server();
+
+/**
+ * Prints the pid, position and message of each process
+ *
+ * @param step The current step
+ * @param devices Array of device pids
+ * @param positions Current node of devices positions
+ */
+void print_status(size_t step, pid_t devices[], node_positions *positions);
+
+/**
+ * Function of the server, every two seconds prints the positions and move the
+ * devices.
+ *
+ * @param positions Lista delle posizioni
+ */
+void server_process(list_positions *positions);
