@@ -60,5 +60,6 @@ void server_process(list_positions *list);
 
 /**
  * Function for the devices, create a FIFO
+ *
  */
 void device_process();

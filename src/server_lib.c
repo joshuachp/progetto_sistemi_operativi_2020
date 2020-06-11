@@ -5,6 +5,7 @@
 #include "server_lib.h"
 #include "defines.h"
 #include "err_exit.h"
+#include "fifo.h"
 #include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
@@ -40,7 +41,10 @@ void termination_handler(int signum) {
       for (size_t i = 0; i < DEVICE_NUMBER; i++) {
         kill(pid_devices[i], SIGKILL);
       }
-      // Close FIFO
+      // Remove FIFO
+      for (size_t i = 0; i < DEVICE_NUMBER; i++) {
+        remove_fifo_device(pid_devices[i]);
+      }
       // Remove board shared memory
       remove_shared_memory(shmid_board);
       // Remove acknowledgement shared memory
