@@ -23,16 +23,19 @@ list_positions *read_positions_file(char *filename) {
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
-    err_exit("open");
+    err_exit("open", __FILE__, __LINE__);
   }
   // File stats
   struct stat sb;
   if (fstat(fd, &sb) == -1)
-    err_exit("Error fstat");
+    err_exit("fstat", __FILE__, __LINE__);
 
   // Check size if null return
   if (sb.st_size == 0) {
-    fputs("Error stat: file is empy", stderr);
+    fprintf(stderr,
+            "Error in file \"%s\" at line %d\n"
+            "stat: file is empy\n",
+            __FILE__, __LINE__);
     return NULL;
   }
 
@@ -40,12 +43,12 @@ list_positions *read_positions_file(char *filename) {
   char *buf =
       mmap(NULL, sb.st_size + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
   if (buf == MAP_FAILED)
-    err_exit("Error mmap");
+    err_exit("mmap", __FILE__, __LINE__);
   // make buffer a string
   buf[sb.st_size] = '0';
   // Close file
   if (close(fd) == -1)
-    err_exit("Error close");
+    err_exit("close", __FILE__, __LINE__);
 
   // Create positions list
   list_positions *positions = create_list_positions(NULL, NULL, 0);
@@ -98,7 +101,10 @@ list_positions *read_positions_file(char *filename) {
 
   // Check size if null return
   if (sb.st_size == 0) {
-    fputs("Error stat: file is empy", stderr);
+    fprintf(stderr,
+            "Error in file \"%s\" at line %d\n"
+            "stat: file is empy\n",
+            __FILE__, __LINE__);
     return NULL;
   }
 
@@ -178,7 +184,10 @@ char *get_next_line_buf(char *buf, size_t *index) {
   // Get starting string
   char *str = &buf[*index];
   if (str == 0) {
-    fputs("Error get_next_line_buf: string is empty", stderr);
+    fprintf(stderr,
+            "Error in file \"%s\" at line %d\n"
+            "get_next_line_buf: string is empty\n",
+            __FILE__, __LINE__);
     return NULL;
   }
 
@@ -201,7 +210,10 @@ char *get_next_line_buf(char *buf, size_t *index) {
 
 node_positions *parse_position_str(char *str) {
   if (str == 0 || strlen(str) != 19) {
-    fputs("Error parse_position_str: wrong string length", stderr);
+    fprintf(stderr,
+            "Error in file \"%s\" at line %d\n"
+            "parse_position_str: wrong string length\n",
+            __FILE__, __LINE__);
     return NULL;
   }
   node_positions *node = malloc(sizeof(node_positions));
@@ -212,7 +224,10 @@ node_positions *parse_position_str(char *str) {
                      &node->value[3].i, &node->value[3].j, &node->value[4].i,
                      &node->value[4].j);
   if (check != 10) {
-    fputs("Error parse_position_str: string malformed", stderr);
+    fprintf(stderr,
+            "Error in file \"%s\" at line %d\n"
+            "parse_position_str: string malformed\n",
+            __FILE__, __LINE__);
     free(node);
     return NULL;
   }

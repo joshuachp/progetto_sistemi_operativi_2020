@@ -11,7 +11,7 @@ int alloc_shared_memory(key_t shmKey, size_t size) {
   // get, or create, a shared memory segment
   int shmid = shmget(shmKey, size, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
   if (shmid == -1)
-    err_exit("Error shmget");
+    err_exit("shmget", __FILE__, __LINE__);
 
   return shmid;
 }
@@ -20,18 +20,18 @@ void *get_shared_memory(int shmid, int shmflg) {
   // attach the shared memory
   void *attach = shmat(shmid, NULL, shmflg);
   if (attach == (void *)-1)
-    err_exit("Error shmat");
+    err_exit("shmat", __FILE__, __LINE__);
   return attach;
 }
 
 void free_shared_memory(void *ptr_sh) {
   // detach the shared memory segments
   if (shmdt(ptr_sh) == -1)
-    err_exit("Error shmdt");
+    err_exit("shmdt", __FILE__, __LINE__);
 }
 
 void remove_shared_memory(int shmid) {
   // delete the shared memory segment
   if (shmctl(shmid, IPC_RMID, NULL) == -1)
-    err_exit("Error shmctl");
+    err_exit("shmctl", __FILE__, __LINE__);
 }

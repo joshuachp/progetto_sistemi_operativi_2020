@@ -19,6 +19,7 @@
 int shmid_board;
 int shmid_ack;
 int semid;
+pid_t pid_parent;
 pid_t pid_ack;
 pid_t pid_devices[5];
 
@@ -51,7 +52,7 @@ void termination_handler(int signum) {
       remove_shared_memory(shmid_ack);
       // Remove semaphore set
       if (semctl(semid, 0, IPC_RMID, 0) == -1)
-        err_exit("semctl IPC_RMID");
+        err_exit("semctl", __FILE__, __LINE__);
       exit(0);
   }
 }
@@ -80,16 +81,18 @@ void setup_sig_handler() {
   sigemptyset(&action.sa_mask);
   action.sa_flags = 0;
   if (sigaction(SIGTERM, &action, NULL) == -1)
-    err_exit("sigaction");
+    err_exit("sigaction", __FILE__, __LINE__);
 
 #ifndef NDEBUG
   // Permit <C-c> for debug build
   if (sigaction(SIGINT, &action, NULL) == -1)
-    err_exit("sigaction");
+    err_exit("sigaction", __FILE__, __LINE__);
 #endif
 }
 
 void set_up_server() {
+  // Get PID of parent for forks
+  pid_parent = getpid();
   // Create shared memory board, create a 10*10 int data segment that will be
   // accessible throw pointer arithmetics
   shmid_board =
@@ -100,14 +103,14 @@ void set_up_server() {
   // Create 7 semaphores and initialize it
   semid = semget(IPC_PRIVATE, 4, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
   if (semid == -1)
-    err_exit("semget");
+    err_exit("semget", __FILE__, __LINE__);
   // Initialize the semaphore set with semctl
   // TODO: Check sem values
   unsigned short semInitVal[] = {0, 0, 0, 0, 0, 0, 0};
   union semun arg;
   arg.array = semInitVal;
   if (semctl(semid, 0, SETALL, arg) == -1)
-    err_exit("semctl SETALL");
+    err_exit("semctl", __FILE__, __LINE__);
 }
 
 void print_status(size_t step, pid_t devices[], node_positions *positions) {
@@ -127,7 +130,9 @@ void server_process(list_positions *list) {
 
 void device_process() {
   // get pid
+  pid_t pid = getpid();
   // make fifo
+  make_fifo_device(pid);
   // send messages if any
   // read messages
 }

@@ -22,29 +22,28 @@ int main(int argc, char *argv[]) {
   char *file = argv[2];
   list_positions *positions = read_positions_file(file);
 
+  // Signals setup
+  setup_sig_handler();
+
   // Server setup
   set_up_server();
 
   // Fork ack manager
   pid_ack = fork();
   if (pid_ack == -1)
-    err_exit("fork");
+    err_exit("fork", __FILE__, __LINE__);
   if (pid_ack == 0) {
     // ack manager
   }
-
   // Fork devices
   for (int i = 0; i < DEVICE_NUMBER; i++) {
     pid_devices[i] = fork();
     if (pid_devices[i] == -1)
-      err_exit("fork");
+      err_exit("fork", __FILE__, __LINE__);
     if (pid_devices[i] == 0) {
       // device
     }
   }
-
-  // Signals setup
-  setup_sig_handler();
 
   // server processes
   server_process(positions);
