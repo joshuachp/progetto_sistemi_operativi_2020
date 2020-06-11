@@ -14,6 +14,8 @@ extern int shmid_ack;
 // Semaphore set id
 extern int semid;
 // PID of the acknowledgement manager
+extern pid_t pid_server;
+// PID of the acknowledgement manager
 extern pid_t pid_ack;
 // PID of each device
 extern pid_t pid_devices[5];

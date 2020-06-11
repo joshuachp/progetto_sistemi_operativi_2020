@@ -11,7 +11,7 @@
 #define MIN_POSITIONS_ARRAY_LENGTH 6
 #define BOARD_SIZE 10
 #define DEVICE_NUMBER 5
-#define SLEEP_TIME 2
+#define SLEEP_TIME_SERVER 2
 
 /**
  * Messages sent from the clients to the devices

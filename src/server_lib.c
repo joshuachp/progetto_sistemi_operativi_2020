@@ -9,6 +9,7 @@
 #include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
+#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +20,7 @@
 int shmid_board;
 int shmid_ack;
 int semid;
-pid_t pid_parent;
+pid_t pid_server;
 pid_t pid_ack;
 pid_t pid_devices[5];
 
@@ -91,8 +92,7 @@ void setup_sig_handler() {
 }
 
 void set_up_server() {
-  // Get PID of parent for forks
-  pid_parent = getpid();
+  pid_server = getpid();
   // Create shared memory board, create a 10*10 int data segment that will be
   // accessible throw pointer arithmetics
   shmid_board =
@@ -125,14 +125,22 @@ void print_status(size_t step, pid_t devices[], node_positions *positions) {
 
 void server_process(list_positions *list) {
   // Waits two seconds
-  sleep(SLEEP_TIME);
+  sleep(SLEEP_TIME_SERVER);
 }
 
 void device_process() {
   // get pid
   pid_t pid = getpid();
-  // make fifo
+  // make FIFO
   make_fifo_device(pid);
+  // open FIFO device
+  char *path = pid_fifo_path(pid);
+  int fifo = open(path, O_RDONLY);
+  if (fifo == -1) {
+    print_perror("open", __FILE__, __LINE__);
+    kill(pid_server, SIGTERM);
+  }
+  free(path);
   // send messages if any
   // read messages
 }

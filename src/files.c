@@ -32,10 +32,7 @@ list_positions *read_positions_file(char *filename) {
 
   // Check size if null return
   if (sb.st_size == 0) {
-    fprintf(stderr,
-            "Error in file \"%s\" at line %d\n"
-            "stat: file is empy\n",
-            __FILE__, __LINE__);
+    print_err("stat: file is empy", __FILE__, __LINE__);
     return NULL;
   }
 
@@ -101,10 +98,7 @@ list_positions *read_positions_file(char *filename) {
 
   // Check size if null return
   if (sb.st_size == 0) {
-    fprintf(stderr,
-            "Error in file \"%s\" at line %d\n"
-            "stat: file is empy\n",
-            __FILE__, __LINE__);
+    print_err("stat: file is empty", __FILE__, __LINE__);
     return NULL;
   }
 
@@ -184,10 +178,7 @@ char *get_next_line_buf(char *buf, size_t *index) {
   // Get starting string
   char *str = &buf[*index];
   if (str == 0) {
-    fprintf(stderr,
-            "Error in file \"%s\" at line %d\n"
-            "get_next_line_buf: string is empty\n",
-            __FILE__, __LINE__);
+    print_err("get_next_line_buf: string is empty", __FILE__, __LINE__);
     return NULL;
   }
 
@@ -210,10 +201,7 @@ char *get_next_line_buf(char *buf, size_t *index) {
 
 node_positions *parse_position_str(char *str) {
   if (str == 0 || strlen(str) != 19) {
-    fprintf(stderr,
-            "Error in file \"%s\" at line %d\n"
-            "parse_position_str: wrong string length\n",
-            __FILE__, __LINE__);
+    print_err("parse_position_str: wrong string length", __FILE__, __LINE__);
     return NULL;
   }
   node_positions *node = malloc(sizeof(node_positions));
@@ -224,10 +212,7 @@ node_positions *parse_position_str(char *str) {
                      &node->value[3].i, &node->value[3].j, &node->value[4].i,
                      &node->value[4].j);
   if (check != 10) {
-    fprintf(stderr,
-            "Error in file \"%s\" at line %d\n"
-            "parse_position_str: string malformed\n",
-            __FILE__, __LINE__);
+    print_err("parse_position_str: string malformed\n", __FILE__, __LINE__);
     free(node);
     return NULL;
   }

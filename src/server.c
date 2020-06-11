@@ -13,13 +13,14 @@
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
-
+  // Get parameters
   uint32_t key;
   if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
     print_help();
     return 1;
   }
   char *file = argv[2];
+
   list_positions *positions = read_positions_file(file);
 
   // Signals setup
