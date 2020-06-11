@@ -18,6 +18,8 @@
 int shmid_board;
 int shmid_ack;
 int semid;
+pid_t pid_ack;
+pid_t pid_devices[5];
 
 void print_help(void) {
   puts("Usage:\n"
@@ -33,6 +35,12 @@ void termination_handler(int signum) {
 #ifndef NDEBUG
     case SIGINT:
 #endif
+      // Kill processes
+      kill(pid_ack, SIGKILL);
+      for (size_t i = 0; i < DEVICE_NUMBER; i++) {
+        kill(pid_devices[i], SIGKILL);
+      }
+      // Close FIFO
       // Remove board shared memory
       remove_shared_memory(shmid_board);
       // Remove acknowledgement shared memory
@@ -108,7 +116,14 @@ void print_status(size_t step, pid_t devices[], node_positions *positions) {
   puts("#############################################");
 }
 
-void server_process(list_positions *positions) {
+void server_process(list_positions *list) {
   // Waits two seconds
   sleep(SLEEP_TIME);
+}
+
+void device_process() {
+  // get pid
+  // make fifo
+  // send messages if any
+  // read messages
 }

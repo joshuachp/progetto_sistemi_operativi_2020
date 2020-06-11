@@ -54,7 +54,7 @@ list_positions *read_positions_file(char *filename) {
   size_t index = 0;
   char *line;
   node_positions *node;
-  while (index != sb.st_size && buf[index] != 0) {
+  while (index != (size_t)sb.st_size && buf[index] != 0) {
     line = get_next_line_buf(buf, &index);
     if (line == NULL) {
       free(line);
@@ -103,7 +103,7 @@ list_positions *read_positions_file(char *filename) {
   }
 
   // Map file to buff
-  char *buf = malloc(sizeof(char) * BUF_READ_SIZE);
+  char *buf = malloc(BUF_READ_SIZE + 1);
   size_t file_read = 0;
 
   // Create positions list
@@ -116,7 +116,7 @@ list_positions *read_positions_file(char *filename) {
   char *line;
   node_positions *node;
 
-  size_t b_read = read(fd, buf, BUF_READ_SIZE - 1);
+  size_t b_read = read(fd, buf, BUF_READ_SIZE);
   while (b_read != 0) {
     // Make buf a string
     buf[b_read] = 0;
@@ -190,7 +190,7 @@ char *get_next_line_buf(char *buf, size_t *index) {
   }
 
   // Copy the string
-  char *ret = malloc(sizeof(char) * (end - str));
+  char *ret = malloc(end - str);
   char t = *end;
   *end = 0;
   ret = strcpy(ret, str);

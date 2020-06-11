@@ -22,38 +22,35 @@ int main(int argc, char *argv[]) {
   char *file = argv[2];
   list_positions *positions = read_positions_file(file);
 
-  // Signals setup
-  setup_sig_handler();
-
   // Server setup
   set_up_server();
 
-  // Setup processes
-  pid_t pid;
-  pid_t *pid_devices = malloc(sizeof(pid_t) * DEVICE_NUMBER);
   // Fork ack manager
-  pid = fork();
-  if (pid == -1)
+  pid_ack = fork();
+  if (pid_ack == -1)
     err_exit("fork");
-  if (pid == 0) {
+  if (pid_ack == 0) {
     // ack manager
   }
 
   // Fork devices
-  for (int i = 0; i < 5; i++) {
-    pid = fork();
-    if (pid == -1)
+  for (int i = 0; i < DEVICE_NUMBER; i++) {
+    pid_devices[i] = fork();
+    if (pid_devices[i] == -1)
       err_exit("fork");
-    if (pid == 0) {
+    if (pid_devices[i] == 0) {
       // device
     }
-    pid_devices[i] = pid;
   }
+
+  // Signals setup
+  setup_sig_handler();
 
   // server processes
   server_process(positions);
-  free_list_positions(positions);
 
+  // Free structures
+  free_list_positions(positions);
   return 0;
 }
 

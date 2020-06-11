@@ -13,6 +13,10 @@ extern int shmid_board;
 extern int shmid_ack;
 // Semaphore set id
 extern int semid;
+// PID of the acknowledgement manager
+extern pid_t pid_ack;
+// PID of each device
+extern pid_t pid_devices[5];
 
 /*
  * Prints the help for the binary
@@ -47,9 +51,14 @@ void set_up_server();
 void print_status(size_t step, pid_t devices[], node_positions *positions);
 
 /**
- * Function of the server, every two seconds prints the positions and move the
+ * Function for the server, every two seconds prints the positions and move the
  * devices.
  *
- * @param positions Lista delle posizioni
+ * @param list Lista delle posizioni
  */
-void server_process(list_positions *positions);
+void server_process(list_positions *list);
+
+/**
+ * Function for the devices, create a FIFO
+ */
+void device_process();
