@@ -7,6 +7,7 @@ add_compile_options(-Wall -Wextra -pedantic -fdiagnostics-color)
 
 set( CLIENT_SRC
   src/defines.c
+  src/client_lib.c
   src/position.c
 )
 set( SERVER_SRC

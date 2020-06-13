@@ -21,9 +21,9 @@ extern pid_t pid_ack;
 extern pid_t pid_devices[5];
 
 /*
- * Prints the help for the binary
+ * Prints the help for the SERVER
  */
-void print_help(void);
+void print_help_server(void);
 
 /**
  * Handles the closing the all the forked processes and shared memories

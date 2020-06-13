@@ -24,7 +24,7 @@ pid_t pid_server;
 pid_t pid_ack;
 pid_t pid_devices[5];
 
-void print_help(void) {
+void print_help_server(void) {
   puts("Usage:\n"
        "  server KEY FILE\n"
        "\n"
@@ -124,8 +124,10 @@ void print_status(size_t step, pid_t devices[], node_positions *positions) {
 }
 
 void server_process(list_positions *list) {
-  // Waits two seconds
-  sleep(SLEEP_TIME_SERVER);
+  while (1) {
+    // Waits two seconds
+    sleep(SLEEP_TIME_SERVER);
+  }
 }
 
 void device_process() {

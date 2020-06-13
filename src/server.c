@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
   // Get parameters
   uint32_t key;
   if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
-    print_help();
+    print_help_server();
     return 1;
   }
   char *file = argv[2];
@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
   server_process(positions);
 
   // Free structures
+  // XXX: Unreachable if program is executed normally
   free_list_positions(positions);
   return 0;
 }
