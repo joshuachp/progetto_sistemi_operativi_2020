@@ -14,10 +14,10 @@ char *pid_fifo_path(pid_t pid) {
   // Get length of the final string for allocation
   int length = snprintf(NULL, 0, "/tmp/devices/dev_fifo.%d", pid);
   char *path = malloc(length + 1);
-  if (sprintf(path, "/tmp/devices/dev_fifo.%d", pid) != 1)
+  if (sprintf(path, "/tmp/devices/dev_fifo.%d", pid) != length)
     fprintf(stderr,
             "Error in file \"%s\" at line %d\n"
-            "sprintf: not enough parameters\n",
+            "sprintf: lengths doesn't match\n",
             __FILE__, __LINE__);
   return path;
 }
