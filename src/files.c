@@ -15,22 +15,24 @@
 #include <unistd.h>
 
 list_positions *read_positions_file(char *filename) {
-  // TODO: Change back to ifndef
-  // Use mmap instrad of read
-#ifdef NDEBUG
+  // XXX: mmap to read file has better performance but is more unstable. We
+  // could also use the information of the file size to read the file in one go
+  // but it will have the same effect of the mmap.
+  // Use read in release
+#ifndef NDEBUG
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
-    err_exit("open");
+    err_exit("open", __FILE__, __LINE__);
   }
   // File stats
   struct stat sb;
   if (fstat(fd, &sb) == -1)
-    err_exit("Error fstat");
+    err_exit("fstat", __FILE__, __LINE__);
 
   // Check size if null return
   if (sb.st_size == 0) {
-    fputs("Error stat: file is empy", stderr);
+    print_err("stat: file is empy", __FILE__, __LINE__);
     return NULL;
   }
 
@@ -38,12 +40,12 @@ list_positions *read_positions_file(char *filename) {
   char *buf =
       mmap(NULL, sb.st_size + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
   if (buf == MAP_FAILED)
-    err_exit("Error mmap");
+    err_exit("mmap", __FILE__, __LINE__);
   // make buffer a string
   buf[sb.st_size] = '0';
   // Close file
   if (close(fd) == -1)
-    err_exit("Error close");
+    err_exit("close", __FILE__, __LINE__);
 
   // Create positions list
   list_positions *positions = create_list_positions(NULL, NULL, 0);
@@ -52,7 +54,7 @@ list_positions *read_positions_file(char *filename) {
   size_t index = 0;
   char *line;
   node_positions *node;
-  while (index != sb.st_size && buf[index] != 0) {
+  while (index != (size_t)sb.st_size && buf[index] != 0) {
     line = get_next_line_buf(buf, &index);
     if (line == NULL) {
       free(line);
@@ -96,12 +98,12 @@ list_positions *read_positions_file(char *filename) {
 
   // Check size if null return
   if (sb.st_size == 0) {
-    fputs("Error stat: file is empy", stderr);
+    print_err("stat: file is empty", __FILE__, __LINE__);
     return NULL;
   }
 
   // Map file to buff
-  char *buf = malloc(sizeof(char) * BUF_READ_SIZE);
+  char *buf = malloc(BUF_READ_SIZE + 1);
   size_t file_read = 0;
 
   // Create positions list
@@ -114,7 +116,7 @@ list_positions *read_positions_file(char *filename) {
   char *line;
   node_positions *node;
 
-  size_t b_read = read(fd, buf, BUF_READ_SIZE - 1);
+  size_t b_read = read(fd, buf, BUF_READ_SIZE);
   while (b_read != 0) {
     // Make buf a string
     buf[b_read] = 0;
@@ -176,7 +178,7 @@ char *get_next_line_buf(char *buf, size_t *index) {
   // Get starting string
   char *str = &buf[*index];
   if (str == 0) {
-    fputs("Error get_next_line_buf: string is empty", stderr);
+    print_err("get_next_line_buf: string is empty", __FILE__, __LINE__);
     return NULL;
   }
 
@@ -188,7 +190,7 @@ char *get_next_line_buf(char *buf, size_t *index) {
   }
 
   // Copy the string
-  char *ret = malloc(sizeof(char) * (end - str));
+  char *ret = malloc(end - str);
   char t = *end;
   *end = 0;
   ret = strcpy(ret, str);
@@ -199,7 +201,7 @@ char *get_next_line_buf(char *buf, size_t *index) {
 
 node_positions *parse_position_str(char *str) {
   if (str == 0 || strlen(str) != 19) {
-    fputs("Error parse_position_str: wrong string length", stderr);
+    print_err("parse_position_str: wrong string length", __FILE__, __LINE__);
     return NULL;
   }
   node_positions *node = malloc(sizeof(node_positions));
@@ -210,7 +212,7 @@ node_positions *parse_position_str(char *str) {
                      &node->value[3].i, &node->value[3].j, &node->value[4].i,
                      &node->value[4].j);
   if (check != 10) {
-    fputs("Error parse_position_str: string malformed", stderr);
+    print_err("parse_position_str: string malformed\n", __FILE__, __LINE__);
     free(node);
     return NULL;
   }

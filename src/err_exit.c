@@ -7,7 +7,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void err_exit(const char *msg) {
+void err_exit(const char *msg, char *file, int line) {
+  fprintf(stderr, "Error in file \"%s\" at line %d\n", file, line);
   perror(msg);
   exit(1);
+}
+
+void print_err(const char *msg, char *file, int line) {
+  fprintf(stderr,
+          "Error in file \"%s\" at line %d\n"
+          "%s\n",
+          file, line, msg);
+}
+
+void print_perror(const char *msg, char *file, int line) {
+  fprintf(stderr, "Error in file \"%s\" at line %d\n", file, line);
+  perror(msg);
 }

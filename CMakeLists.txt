@@ -2,11 +2,16 @@ cmake_minimum_required(VERSION 3.7)
 
 project(progetto_sistemi_operativi)
 
+# Options
+add_compile_options(-Wall -Wextra -pedantic -fdiagnostics-color) 
+
 set( CLIENT_SRC
   src/defines.c
+  src/client_lib.c
   src/position.c
 )
 set( SERVER_SRC
+  src/server_lib.c
   src/err_exit.c
   src/defines.c
   src/shared_memory.c

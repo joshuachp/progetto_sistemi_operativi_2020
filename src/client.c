@@ -1,26 +1,24 @@
 /// @file client.c
 /// @brief Contiene l'implementazione del client.
 
+#include "client_lib.h"
 #include "defines.h"
+#include <stdint.h>
 #include <stdio.h>
-
-/*
- * Prints the help for the binary
- */
-void print_help(void);
+#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  // Key argument is required
-  if (argc != 2) {
-    print_help();
+  // Get key argument
+  uint32_t key;
+  if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
+    print_help_client();
     return 1;
   }
-  return 0;
-}
 
-void print_help() {
-  puts("Usage:\n"
-       "  client KEY\n"
-       "\n"
-       "With the KEY of the message queue.");
+  pid_t pid;
+  Message *message = create_message_client(&pid);
+
+  // Exit
+  free(message);
+  return 0;
 }
