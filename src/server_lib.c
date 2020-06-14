@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/msg.h>
 #include <sys/sem.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -20,6 +21,7 @@
 int shmid_board;
 int shmid_ack;
 int semid;
+int msqid;
 pid_t pid_server;
 pid_t pid_ack;
 pid_t pid_devices[5];
@@ -54,6 +56,9 @@ void termination_handler(int signum) {
       // Remove semaphore set
       if (semctl(semid, 0, IPC_RMID, 0) == -1)
         err_exit("semctl", __FILE__, __LINE__);
+      // Remove message queue
+      if (msgctl(msqid, IPC_RMID, 0) == -1)
+        err_exit("msgctl", __FILE__, __LINE__);
       exit(0);
   }
 }
@@ -91,7 +96,7 @@ void setup_sig_handler() {
 #endif
 }
 
-void set_up_server() {
+void set_up_server(key_t key) {
   pid_server = getpid();
   // Create shared memory board, create a 10*10 int data segment that will be
   // accessible throw pointer arithmetics
@@ -111,6 +116,10 @@ void set_up_server() {
   arg.array = semInitVal;
   if (semctl(semid, 0, SETALL, arg) == -1)
     err_exit("semctl", __FILE__, __LINE__);
+  // Create message queue
+  msqid = msgget(key, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR | S_IRGRP);
+  if (msqid == -1)
+    err_exit("msgget", __FILE__, __LINE__);
 }
 
 void print_status(size_t step, pid_t devices[], node_positions *positions) {

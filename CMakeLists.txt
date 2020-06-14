@@ -9,6 +9,8 @@ set( CLIENT_SRC
   src/defines.c
   src/client_lib.c
   src/position.c
+  src/fifo.c
+  src/err_exit.c
 )
 set( SERVER_SRC
   src/server_lib.c

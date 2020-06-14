@@ -14,8 +14,8 @@
 
 int main(int argc, char *argv[]) {
   // Get parameters
-  uint32_t key;
-  if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
+  key_t key;
+  if (argc != 3 || sscanf(argv[1], "%d", &key) != 1) {
     print_help_server();
     return 1;
   }
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   setup_sig_handler();
 
   // Server setup
-  set_up_server();
+  set_up_server(key);
 
   // Fork ack manager
   pid_ack = fork();
