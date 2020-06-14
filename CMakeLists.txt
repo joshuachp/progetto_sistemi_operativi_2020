@@ -10,6 +10,7 @@ set( CLIENT_SRC
   src/client_lib.c
   src/position.c
   src/fifo.c
+  src/message.c
   src/err_exit.c
 )
 set( SERVER_SRC
@@ -20,6 +21,7 @@ set( SERVER_SRC
   src/semaphore.c
   src/fifo.c
   src/position.c
+  src/message.c
   src/files.c
 )
 

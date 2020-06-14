@@ -31,6 +31,6 @@ void make_fifo_device(pid_t pid) {
 void remove_fifo_device(pid_t pid) {
   char *path = pid_fifo_path(pid);
   if (remove(path) == -1)
-    err_exit("remove", __FILE__, __LINE__);
+    print_perror("remove", __FILE__, __LINE__);
   free(path);
 }

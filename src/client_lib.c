@@ -4,6 +4,7 @@
 #include "client_lib.h"
 #include "defines.h"
 #include "err_exit.h"
+#include "message.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
