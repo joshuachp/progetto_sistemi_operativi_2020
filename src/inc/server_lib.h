@@ -4,13 +4,17 @@
 
 #pragma once
 
+#include "defines.h"
 #include "position.h"
 #include <stdlib.h>
+#include <sys/types.h>
 
 // Board shared memory id
 extern int shmid_board;
+extern pid_t *shm_board;
 // Acknowledgment shared memory id
 extern int shmid_ack;
+extern Acknowledgment *shm_ack;
 // Semaphore set id
 extern int semid;
 // Message queue id
@@ -67,5 +71,6 @@ void server_process(list_positions *list);
 /**
  * Function for the devices, create a FIFO
  *
+ * @param dev_num Device number for semaphores
  */
-void device_process();
+void device_process(size_t dev_num);

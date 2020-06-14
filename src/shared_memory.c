@@ -33,5 +33,5 @@ void free_shared_memory(void *ptr_sh) {
 void remove_shared_memory(int shmid) {
   // delete the shared memory segment
   if (shmctl(shmid, IPC_RMID, NULL) == -1)
-    err_exit("shmctl", __FILE__, __LINE__);
+    print_perror("shmctl", __FILE__, __LINE__);
 }
