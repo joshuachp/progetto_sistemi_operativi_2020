@@ -14,9 +14,9 @@ union semun {
   unsigned short *array;
 };
 
-/* errsemOpExit is a support function to manipulate a semaphore's value
+/* semOp is a support function to manipulate a semaphore's value
  * of a semaphore set. semid is a semaphore set identifier, sem_num is the
  * index of a semaphore in the set, sem_op is the operation performed on sem_num
  */
-void sem_op(int semid, unsigned short sem_num, short sem_op);
+void semaphore_op(int semid, unsigned short sem_num, short sem_op);
 

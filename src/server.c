@@ -36,12 +36,13 @@ int main(int argc, char *argv[]) {
   }
 
   // Fork devices
-  for (int i = 0; i < DEVICE_NUMBER; i++) {
+  for (size_t i = 0; i < DEVICE_NUMBER; i++) {
     pid_devices[i] = fork();
     if (pid_devices[i] == -1)
       err_exit("fork", __FILE__, __LINE__);
     if (pid_devices[i] == 0) {
       // device
+      device_process(i);
       return 0;
     }
   }

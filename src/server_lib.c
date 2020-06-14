@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/msg.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
@@ -49,20 +50,26 @@ void termination_handler(int signum) {
       for (size_t i = 0; i < DEVICE_NUMBER; i++) {
         kill(pid_devices[i], SIGKILL);
       }
+
       // Remove FIFO
       for (size_t i = 0; i < DEVICE_NUMBER; i++) {
         remove_fifo_device(pid_devices[i]);
       }
+
       // Remove board shared memory
       remove_shared_memory(shmid_board);
+
       // Remove acknowledgement shared memory
       remove_shared_memory(shmid_ack);
+
       // Remove semaphore set
       if (semctl(semid, 0, IPC_RMID, 0) == -1)
         print_perror("semctl", __FILE__, __LINE__);
+
       // Remove message queue
       if (msgctl(msqid, IPC_RMID, 0) == -1)
         print_perror("msgctl", __FILE__, __LINE__);
+
       exit(0);
   }
 }
@@ -102,15 +109,19 @@ void setup_sig_handler() {
 
 void set_up_server(key_t key) {
   pid_server = getpid();
+
   // Create and attach shared memory board, create a 10*10 int data segment that
   // will be accessible throw pointer arithmetics
   shmid_board =
       alloc_shared_memory(IPC_PRIVATE, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
   shm_board = get_shared_memory(shmid_board, 0);
-  // Create and attach shared memory acknowledgement
+
+  // Create, attach and sets to NULL shared memory acknowledgement
   shmid_ack =
       alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * ACK_SIZE);
   shm_ack = get_shared_memory(shmid_ack, 0);
+  shm_ack = memset(shm_ack, 0, sizeof(Acknowledgment) * ACK_SIZE);
+
   // Create 7 semaphores and initialize it
   semid = semget(IPC_PRIVATE, 4, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
   if (semid == -1)
@@ -122,6 +133,7 @@ void set_up_server(key_t key) {
   arg.array = semInitVal;
   if (semctl(semid, 0, SETALL, arg) == -1)
     err_exit("semctl", __FILE__, __LINE__);
+
   // Create message queue
   msqid = msgget(key, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR | S_IRGRP);
   if (msqid == -1)
@@ -145,11 +157,13 @@ void server_process(list_positions *list) {
   }
 }
 
-void device_process() {
+void device_process(size_t dev_num) {
   // get pid
   pid_t pid = getpid();
+
   // Message list
   list_message *messages = create_list_message(NULL, NULL, 0);
+
   // make FIFO
   make_fifo_device(pid);
   // open FIFO device
@@ -160,6 +174,14 @@ void device_process() {
     kill(pid_server, SIGTERM);
   }
   free(path);
-  // send messages if any
-  // read messages
+
+  // TODO: Start here
+  semaphore_op(semid, dev_num, 1);
+
+  while (1) {
+    // send messages if any
+    if (messages) {
+    }
+    // read messages
+  }
 }
