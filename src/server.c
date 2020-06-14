@@ -23,9 +23,6 @@ int main(int argc, char *argv[]) {
 
   list_positions *positions = read_positions_file(file);
 
-  // Signals setup
-  setup_sig_handler();
-
   // Server setup
   set_up_server(key);
 
@@ -35,7 +32,9 @@ int main(int argc, char *argv[]) {
     err_exit("fork", __FILE__, __LINE__);
   if (pid_ack == 0) {
     // ack manager
+    return 0;
   }
+
   // Fork devices
   for (int i = 0; i < DEVICE_NUMBER; i++) {
     pid_devices[i] = fork();
@@ -43,8 +42,12 @@ int main(int argc, char *argv[]) {
       err_exit("fork", __FILE__, __LINE__);
     if (pid_devices[i] == 0) {
       // device
+      return 0;
     }
   }
+
+  // Signals setup
+  setup_sig_handler();
 
   // server processes
   server_process(positions);
@@ -54,4 +57,3 @@ int main(int argc, char *argv[]) {
   free_list_positions(positions);
   return 0;
 }
-

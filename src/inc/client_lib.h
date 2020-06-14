@@ -5,6 +5,7 @@
 #pragma once
 
 #include "defines.h"
+#include "message.h"
 #include <stdint.h>
 #include <sys/types.h>
 

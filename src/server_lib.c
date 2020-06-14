@@ -6,6 +6,7 @@
 #include "defines.h"
 #include "err_exit.h"
 #include "fifo.h"
+#include "message.h"
 #include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
@@ -15,11 +16,14 @@
 #include <stdlib.h>
 #include <sys/msg.h>
 #include <sys/sem.h>
+#include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 int shmid_board;
+pid_t *shm_board;
 int shmid_ack;
+Acknowledgment *shm_ack;
 int semid;
 int msqid;
 pid_t pid_server;
@@ -55,10 +59,10 @@ void termination_handler(int signum) {
       remove_shared_memory(shmid_ack);
       // Remove semaphore set
       if (semctl(semid, 0, IPC_RMID, 0) == -1)
-        err_exit("semctl", __FILE__, __LINE__);
+        print_perror("semctl", __FILE__, __LINE__);
       // Remove message queue
       if (msgctl(msqid, IPC_RMID, 0) == -1)
-        err_exit("msgctl", __FILE__, __LINE__);
+        print_perror("msgctl", __FILE__, __LINE__);
       exit(0);
   }
 }
@@ -98,13 +102,15 @@ void setup_sig_handler() {
 
 void set_up_server(key_t key) {
   pid_server = getpid();
-  // Create shared memory board, create a 10*10 int data segment that will be
-  // accessible throw pointer arithmetics
+  // Create and attach shared memory board, create a 10*10 int data segment that
+  // will be accessible throw pointer arithmetics
   shmid_board =
       alloc_shared_memory(IPC_PRIVATE, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
-  // Create shared memory acknowledgement
+  shm_board = get_shared_memory(shmid_board, 0);
+  // Create and attach shared memory acknowledgement
   shmid_ack =
-      alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * DEVICE_NUMBER);
+      alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * ACK_SIZE);
+  shm_ack = get_shared_memory(shmid_ack, 0);
   // Create 7 semaphores and initialize it
   semid = semget(IPC_PRIVATE, 4, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
   if (semid == -1)
@@ -142,6 +148,8 @@ void server_process(list_positions *list) {
 void device_process() {
   // get pid
   pid_t pid = getpid();
+  // Message list
+  list_message *messages = create_list_message(NULL, NULL, 0);
   // make FIFO
   make_fifo_device(pid);
   // open FIFO device
