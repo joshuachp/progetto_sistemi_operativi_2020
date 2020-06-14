@@ -30,7 +30,6 @@ typedef struct {
 
 /**
  * Acknowledgement saved in the shared memory
- * TODO: Not sure if this is needed in the client
  */
 typedef struct {
   pid_t pid_sender;
@@ -38,3 +37,11 @@ typedef struct {
   int message_id;
   time_t timestamp;
 } Acknowledgment;
+
+/**
+ * Acknowledgement sent to the client
+ */
+typedef struct {
+  long mtype;
+  Acknowledgment ack;
+} ack_msg;

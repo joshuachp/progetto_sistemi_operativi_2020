@@ -23,7 +23,7 @@ char *pid_fifo_path(pid_t pid) {
 
 void make_fifo_device(pid_t pid) {
   char *path = pid_fifo_path(pid);
-  if (mkfifo(path, S_IWUSR | S_IRUSR | S_IWGRP) == -1)
+  if (mkfifo(path, S_IWUSR | S_IRUSR | S_IRGRP) == -1)
     err_exit("mkfifo", __FILE__, __LINE__);
   free(path);
 }

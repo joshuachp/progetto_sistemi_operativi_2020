@@ -14,8 +14,8 @@
 
 int main(int argc, char *argv[]) {
   // Get parameters
-  uint32_t key;
-  if (argc != 3 || sscanf(argv[1], "%u", &key) != 1) {
+  key_t key;
+  if (argc != 3 || sscanf(argv[1], "%d", &key) != 1) {
     print_help_server();
     return 1;
   }
