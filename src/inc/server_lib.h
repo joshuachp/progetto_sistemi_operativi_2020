@@ -13,6 +13,8 @@ extern int shmid_board;
 extern int shmid_ack;
 // Semaphore set id
 extern int semid;
+// Message queue id
+extern int msqid;
 // PID of the acknowledgement manager
 extern pid_t pid_server;
 // PID of the acknowledgement manager
@@ -29,7 +31,7 @@ void print_help_server(void);
  * Handles the closing the all the forked processes and shared memories
  * segments before closing the server process beautifully.
  *
- * @param signum SIGTERM
+ * @param signum Signal that was blocked
  */
 void termination_handler(int);
 
@@ -39,9 +41,11 @@ void termination_handler(int);
 void setup_sig_handler();
 
 /**
- * Setup up the shared memories and semaphores
+ * Setup up the shared memories, semaphores and message queue
+ *
+ * @param key Message queue key
  */
-void set_up_server();
+void set_up_server(key_t key);
 
 /**
  * Prints the pid, position and message of each process

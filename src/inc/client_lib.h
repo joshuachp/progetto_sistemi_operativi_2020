@@ -32,3 +32,10 @@ Message *create_message_client(pid_t *pid);
  */
 uint8_t max_distance_sqr(double max_distance);
 
+/**
+ * Writes the list of acknowledgment to the file `out_<message_id>.txt`
+ *
+ * @param message Message sent to the devices
+ * @param ack_list List of acknowledgement
+ */
+void write_out_message_id(Message *message, Acknowledgment ack_list[5]);
