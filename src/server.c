@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   setup_sig_handler();
 
   // Server setup
-  set_up_server();
+  set_up_server(key);
 
   // Fork ack manager
   pid_ack = fork();

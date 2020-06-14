@@ -58,7 +58,7 @@ TEST(free_list_positions, base) {
   std::memcpy(node, &node_stack, sizeof(node_positions));
   list_positions *list = create_list_positions(node, node, 1);
   ASSERT_TRUE(list->head != NULL);
-  ASSERT_NO_THROW(free_list_positions(list));
+  ASSERT_NO_FATAL_FAILURE(free_list_positions(list));
 }
 
 /*

@@ -43,5 +43,5 @@ typedef struct {
  */
 typedef struct {
   long mtype;
-  Acknowledgment ack;
+  Acknowledgment ack_list[5];
 } ack_msg;

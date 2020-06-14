@@ -40,9 +40,10 @@ int main(int argc, char *argv[]) {
     err_exit("close", __FILE__, __LINE__);
   // Receive acknowledgment
   ack_msg *ack = malloc(sizeof(ack_msg));
-  // use PID for distingue message type
-  if (msgrcv(msqid, ack, sizeof(ack->ack), getpid(), 0))
+  if (msgrcv(msqid, ack, sizeof(ack->ack_list), message->message_id, 0))
     err_exit("msgrcv", __FILE__, __LINE__);
+  // Write to out file
+  write_out_message_id(message, ack->ack_list);
   // Free structures
   free(message);
   free(path);
