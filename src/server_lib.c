@@ -25,11 +25,13 @@ int shmid_board;
 pid_t *shm_board;
 int shmid_ack;
 Acknowledgment *shm_ack;
+int shmid_positions;
+vec_2 *shm_positions;
 int semid;
 int msqid;
 pid_t pid_server;
 pid_t pid_ack;
-pid_t pid_devices[5];
+pid_t pid_devices[DEVICE_NUMBER];
 
 void print_help_server(void) {
   puts("Usage:\n"
@@ -51,7 +53,7 @@ void termination_handler(int signum) {
         kill(pid_devices[i], SIGKILL);
       }
 
-      // Remove FIFO
+      // Remove FIFOs
       for (size_t i = 0; i < DEVICE_NUMBER; i++) {
         remove_fifo_device(pid_devices[i]);
       }
@@ -61,6 +63,9 @@ void termination_handler(int signum) {
 
       // Remove acknowledgement shared memory
       remove_shared_memory(shmid_ack);
+
+      // Remove positions shared memory
+      remove_shared_memory(shmid_positions);
 
       // Remove semaphore set
       if (semctl(semid, 0, IPC_RMID, 0) == -1)
@@ -77,7 +82,7 @@ void termination_handler(int signum) {
 void setup_sig_handler() {
   // Register signal handler for SIGTERM to cleanup and terminate the process
   // beautifully.
-  // XXX: Using sigaction instead of signal, see "Portability"
+  // NOTE: Using sigaction instead of signal, see "Portability"
   // https://linux.die.net/man/2/signal
   struct sigaction action;
   sigset_t block_mask;
@@ -87,7 +92,7 @@ void setup_sig_handler() {
   sigaddset(&block_mask, SIGSTOP);
 
 #ifdef NDEBUG
-  // Block <C-c> for not debug build
+  // Block <C-c> for release build
   sigaddset(&block_mask, SIGINT);
 #endif
 
@@ -122,12 +127,18 @@ void set_up_server(key_t key) {
   shm_ack = get_shared_memory(shmid_ack, 0);
   shm_ack = memset(shm_ack, 0, sizeof(Acknowledgment) * ACK_SIZE);
 
+  // Create and attach shared memory positions
+  shmid_positions =
+      alloc_shared_memory(IPC_PRIVATE, sizeof(vec_2) * DEVICE_NUMBER);
+  shm_positions = get_shared_memory(shmid_positions, 0);
+
   // Create 7 semaphores and initialize it
-  semid = semget(IPC_PRIVATE, 4, IPC_CREAT | S_IRUSR | S_IWUSR | S_IRGRP);
+  semid = semget(IPC_PRIVATE, 4,
+                 IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR | S_IRGRP);
   if (semid == -1)
     err_exit("semget", __FILE__, __LINE__);
-  // Initialize the semaphore set with semctl
-  // TODO: Check sem values
+  // Initialize the semaphore set with semctl. The first 5 variables are for
+  // the devices then board and the last one acknowledgement
   unsigned short semInitVal[] = {0, 0, 0, 0, 0, 0, 0};
   union semun arg;
   arg.array = semInitVal;
@@ -140,20 +151,36 @@ void set_up_server(key_t key) {
     err_exit("msgget", __FILE__, __LINE__);
 }
 
-void print_status(size_t step, pid_t devices[], node_positions *positions) {
+void print_status(size_t step) {
   printf("# Step %zu: device positions ########################\n", step);
   for (int i = 0; i < DEVICE_NUMBER; i++) {
     // TODO: Message list
-    printf("%u %hhu %hhu msgs: lista message_id\n", devices[i],
-           positions->value[i].i, positions->value[i].j);
+    printf("%u %hhu %hhu msgs: lista message_id\n", pid_devices[i],
+           shm_positions[i].i, shm_positions[i].j);
   }
   puts("#############################################");
 }
 
 void server_process(list_positions *list) {
-  while (1) {
+  // Current positions
+  node_positions *node = list->head;
+
+  for (size_t i = 0; i < list->length; i++) {
     // Waits two seconds
     sleep(SLEEP_TIME_SERVER);
+
+    // Set positions of all devices
+    shm_positions =
+        memcpy(shm_positions, node->value, sizeof(vec_2) * DEVICE_NUMBER);
+
+    // Print positions
+    print_status(i);
+
+    // Unlock first device
+    semaphore_op(semid, 0, 1);
+
+    // Get next position
+    node = node->next;
   }
 }
 
@@ -169,19 +196,19 @@ void device_process(size_t dev_num) {
   // open FIFO device
   char *path = pid_fifo_path(pid);
   int fifo = open(path, O_RDONLY);
-  if (fifo == -1) {
-    print_perror("open", __FILE__, __LINE__);
-    kill(pid_server, SIGTERM);
-  }
+  if (fifo == -1)
+    err_exit("open", __FILE__, __LINE__);
   free(path);
 
-  // TODO: Start here
-  semaphore_op(semid, dev_num, 1);
-
   while (1) {
+    // With for moving
+    semaphore_op(semid, dev_num, -1);
+
     // send messages if any
-    if (messages) {
+    if (messages->length > 0) {
+      semaphore_op(semid, dev_num, -1);
     }
+
     // read messages
   }
 }
