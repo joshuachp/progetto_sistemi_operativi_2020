@@ -22,8 +22,10 @@ void print_help_client() {
 
 Message *create_message_client(pid_t *pid) {
   Message *message = malloc(sizeof(Message));
+
   // Set the sender PID
   message->pid_sender = getpid();
+
   // Set the device PID
   printf("PID of the device: ");
   while (scanf("%d", pid) != 1 || *pid < 0) {
@@ -31,21 +33,24 @@ Message *create_message_client(pid_t *pid) {
     printf("PID of the device: ");
   }
   message->pid_receiver = *pid;
+
   // Set the message ID
   printf("Message id: ");
   while (scanf("%d", &message->message_id) != 1 || message->message_id < 0) {
     puts("Please enter a valid ID.");
     printf("Message ID: ");
   }
+
   // Set the message content
   printf("Message content: ");
   while (scanf("%255s", message->message) != 1) {
     puts("Please enter a valid content.");
     printf("Message ID: ");
   }
-  // XXX: We ask for a double value, but we convert it in uint8_t since the
-  //      squared maximum value can only be 10^2+10^2=200
+
   // Set the maximum distance
+  // NOTE: We ask for a double value, but we convert it in uint8_t since the
+  //      squared maximum value can only be 10^2+10^2=200
   double max;
   printf("Message max distance: ");
   while (scanf("%lf", &max) != 1 && max < 0) {
@@ -69,6 +74,7 @@ void write_out_message_id(Message *message, Acknowledgment ack_list[5]) {
   int length;
   char *str;
   char time_buf[64];
+
   // Get length of the final string for allocation
   length = snprintf(NULL, 0, "out_%d.txt", message->message_id);
   if (length == -1)
@@ -76,10 +82,12 @@ void write_out_message_id(Message *message, Acknowledgment ack_list[5]) {
   str = malloc(length + 1);
   if (sprintf(str, "out_%d.txt", message->message_id) != length)
     err_exit("sprintf", __FILE__, __LINE__);
+
   // Open file
   int fd = open(str, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP);
   if (fd == -1)
     err_exit("open", __FILE__, __LINE__);
+
   // Write message and message content
   length = snprintf(NULL, 0,
                     "Messaggio %d: %s\n"
@@ -95,6 +103,7 @@ void write_out_message_id(Message *message, Acknowledgment ack_list[5]) {
     err_exit("sprintf", __FILE__, __LINE__);
   if (write(fd, str, length) == -1)
     err_exit("write", __FILE__, __LINE__);
+
   // Write acknowledgment list
   for (int i = 0; i < 5; i++) {
     if (strftime(time_buf, 64, "%Y-%m-%d %H:%M:%S",
@@ -111,8 +120,11 @@ void write_out_message_id(Message *message, Acknowledgment ack_list[5]) {
     if (write(fd, str, length) == -1)
       err_exit("write", __FILE__, __LINE__);
   }
+
   // Close file
+  if (close(fd == -1))
+    err_exit("close", __FILE__, __LINE__);
+
   // Free
   free(str);
 }
-
