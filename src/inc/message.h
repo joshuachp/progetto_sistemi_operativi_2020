@@ -15,7 +15,7 @@ typedef struct {
   pid_t pid_receiver;
   int message_id;
   char message[256];
-  // XXX: Changed from double because we use the squared values to check the
+  // NOTE: Changed from double because we use the squared values to check the
   // distances, so the max_distance (squared) max value can only be
   // 10^2+10^2=200, that is approximately 15 squared.
   uint8_t max_distance;
