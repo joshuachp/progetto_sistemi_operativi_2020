@@ -26,23 +26,9 @@ int main(int argc, char *argv[]) {
   if (msqid == -1)
     err_exit("msgget", __FILE__, __LINE__);
 
-  // Create a message
-  pid_t pid;
-  Message *message = create_message_client(&pid);
-
-  // Open FIFO device
-  char *path = pid_fifo_path(pid);
-  int fd = open(path, O_WRONLY);
-  if (fd == -1)
-    err_exit("open", __FILE__, __LINE__);
-
-  // Write message
-  if (write(fd, message, sizeof(Message)) < (ssize_t)sizeof(Message))
-    err_exit("write", __FILE__, __LINE__);
-
-  // Close FIFO device
-  if (close(fd) == -1)
-    err_exit("close", __FILE__, __LINE__);
+  // Create and sends a message to a device
+  Message *message = create_message_client();
+  send_message_device(message);
 
   // Receive acknowledgment
   ack_msg *ack = malloc(sizeof(ack_msg));
@@ -54,7 +40,6 @@ int main(int argc, char *argv[]) {
 
   // Free structures
   free(message);
-  free(path);
   free(ack);
   return 0;
 }

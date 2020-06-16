@@ -10,18 +10,17 @@ set( CLIENT_SRC
   src/client_lib.c
   src/position.c
   src/fifo.c
-  src/message.c
   src/err_exit.c
 )
 set( SERVER_SRC
   src/server_lib.c
+  src/device.c
   src/err_exit.c
   src/defines.c
   src/shared_memory.c
   src/semaphore.c
   src/fifo.c
   src/position.c
-  src/message.c
   src/files.c
 )
 

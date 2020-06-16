@@ -1,11 +1,11 @@
-/// @file message.cpp
+/// @file defines.cpp
 /// @brief  Contains the tests for the functions and structures for the
-///         messages.
+///         messages and acknowledgment.
 
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "message.h"
+#include "defines.h"
 }
 
 /*
@@ -73,3 +73,4 @@ TEST(append_list_message, null_list) {
   ASSERT_EQ(list->head, node);
   free_list_message(list);
 }
+

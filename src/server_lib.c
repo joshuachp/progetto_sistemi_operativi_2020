@@ -6,7 +6,6 @@
 #include "defines.h"
 #include "err_exit.h"
 #include "fifo.h"
-#include "message.h"
 #include "position.h"
 #include "semaphore.h"
 #include "shared_memory.h"
@@ -120,6 +119,7 @@ void set_up_server(key_t key) {
   shmid_board =
       alloc_shared_memory(IPC_PRIVATE, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
   shm_board = get_shared_memory(shmid_board, 0);
+  shm_board = memset(shm_board, 0, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
 
   // Create, attach and sets to NULL shared memory acknowledgement
   shmid_ack =
@@ -184,31 +184,3 @@ void server_process(list_positions *list) {
   }
 }
 
-void device_process(size_t dev_num) {
-  // get pid
-  pid_t pid = getpid();
-
-  // Message list
-  list_message *messages = create_list_message(NULL, NULL, 0);
-
-  // make FIFO
-  make_fifo_device(pid);
-  // open FIFO device
-  char *path = pid_fifo_path(pid);
-  int fifo = open(path, O_RDONLY);
-  if (fifo == -1)
-    err_exit("open", __FILE__, __LINE__);
-  free(path);
-
-  while (1) {
-    // With for moving
-    semaphore_op(semid, dev_num, -1);
-
-    // send messages if any
-    if (messages->length > 0) {
-      semaphore_op(semid, dev_num, -1);
-    }
-
-    // read messages
-  }
-}

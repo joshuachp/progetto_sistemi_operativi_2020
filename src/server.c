@@ -2,13 +2,11 @@
 /// @brief Contiene l'implementazione del SERVER.
 
 #include "defines.h"
+#include "device.h"
 #include "err_exit.h"
-#include "fifo.h"
 #include "files.h"
 #include "position.h"
-#include "semaphore.h"
 #include "server_lib.h"
-#include "shared_memory.h"
 #include <stdint.h>
 #include <stdio.h>
 

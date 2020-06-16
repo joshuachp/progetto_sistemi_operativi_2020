@@ -71,9 +71,3 @@ void print_status(size_t step);
  */
 void server_process(list_positions *list);
 
-/**
- * Function for the devices, create a FIFO
- *
- * @param dev_num Device number for semaphores
- */
-void device_process(size_t dev_num);
