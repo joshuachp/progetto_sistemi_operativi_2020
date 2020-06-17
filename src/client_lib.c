@@ -41,11 +41,13 @@ Message *create_message_client() {
     printf("Message ID: ");
   }
 
+  char t;
+  scanf("%c", &t);
   // Set the message content
   printf("Message content: ");
-  while (scanf("%255s", message->message) != 1) {
+  while (scanf("%255[^\n]", message->message) != 1) {
     puts("Please enter a valid content.");
-    printf("Message ID: ");
+    printf("Message content: ");
   }
 
   printf("Message max distance: ");

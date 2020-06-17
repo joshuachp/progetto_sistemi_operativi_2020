@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #define BUF_READ_SIZE 256
+#define BUFF_MESSAGE_SIZE 256
 #define MIN_POSITIONS_ARRAY_LENGTH 6
 #define BOARD_SIZE 10
 #define DEVICE_NUMBER 5
@@ -32,7 +33,7 @@ typedef struct Message {
   // Message id can only bee in a range of [0,ACK_SIZE) because the shared
   // memory is limited
   int message_id;
-  char message[256];
+  char message[BUFF_MESSAGE_SIZE];
   // Squared value of the max_distance for confront without using the square
   // root
   double max_distance;
