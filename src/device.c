@@ -13,6 +13,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 void device_process(uint8_t dev_num) {
@@ -52,7 +53,7 @@ void device_process(uint8_t dev_num) {
     }
 
     // Read messages
-    recv_messages_device(fifo, messages);
+    recv_messages_device(fifo, dev_num, messages);
 
     // Move the device only if the next position is empty
     semaphore_op(semid, 6, 0);
@@ -68,78 +69,67 @@ void device_process(uint8_t dev_num) {
 }
 
 void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
-                         list_message *messages) {
-  node_message *message;
+                         list_message *list) {
+  node_message *node;
   Message *n_message = malloc(sizeof(Message));
   bool msg_sent;
-  bool ack_found;
 
-  message = messages->head;
-  // Cycle throw the messages and acknowledgement, if an acknowledgement for
-  // that message is not found remove the message
-  while (message != NULL) {
-    // Set acknowledgement found to false and check it at the end
-    ack_found = false;
+  // Cycle throw the messages
+  node = list->head;
+  while (node != NULL) {
 
-    // Chicle throw the acknowledgement five by five because they are in
-    // the device order
-    for (uint8_t i = 0 + dev_num; i < ACK_SIZE && !ack_found;
-         i += DEVICE_NUMBER) {
+    // Check for acknowledgement of the message, otherwise remove it
+    if (shm_ack(node->value.message_id, dev_num).message_id ==
+        node->value.message_id) {
+      msg_sent = false;
 
-      if (shm_ack[i].message_id == message->value.message_id) {
-        ack_found = true;
-        msg_sent = false;
-
-        // Check the board for a device, get the device number and check if we
-        // need to send a message to it and then send it
+      // Check the board for a device, get the device number and check if we
+      // need to send a message to it and then send it
+      for (uint8_t i = 0; i < BOARD_SIZE && !msg_sent; i++) {
         for (uint8_t j = 0; j < BOARD_SIZE && !msg_sent; j++) {
-          for (uint8_t k = 0; k < BOARD_SIZE && !msg_sent; k++) {
 
-            // If there is the PID of a device on the board
-            if (shm_board(j, k) != 0 && shm_board(j, k) != pid) {
-              // Device number
-              uint8_t d_i = 0;
-              while (pid_devices[d_i] != shm_board(j, k))
-                d_i++;
+          // If there is the PID of a device on the board
+          if (shm_board(i, j) != 0 && shm_board(i, j) != pid) {
+            // Device number
+            uint8_t d_n = 0;
+            while (pid_devices[d_n] != shm_board(i, j))
+              d_n++;
 
-              // Check if we need to send a message
-              if (shm_ack[i - dev_num + d_i].timestamp == 0) {
+            // Check if we need to send a message
+            if (shm_ack(node->value.message_id, d_n).message_id !=
+                node->value.message_id) {
 
-                // Check if the distance is inferior to max distance
-                if (distance_sqr(position, (vec_2){i, j}) <=
-                    message->value.max_distance) {
+              // Check if the distance is inferior to max distance
+              if (distance_sqr(position, (vec_2){i, j}) <=
+                  node->value.max_distance) {
 
-                  // Send the message
-                  n_message =
-                      memcpy(n_message, &message->value, sizeof(Message));
-                  n_message->pid_sender = pid;
-                  n_message->pid_receiver = pid_devices[d_i];
-                  send_message_device(n_message);
+                // Send the message
+                n_message = memcpy(n_message, &node->value, sizeof(Message));
+                n_message->pid_sender = pid;
+                n_message->pid_receiver = pid_devices[d_n];
+                send_message_device(n_message);
 
-                  // Set msg_sent to pass to the next message
-                  msg_sent = true;
-                }
+                // Set msg_sent to pass to the next message
+                msg_sent = true;
               }
             }
           }
         }
       }
-    }
 
-    // If acknowledgement not found remove the message else go to next message
-    if (!ack_found) {
-      node_message *t_m = message;
-      message = message->next;
-      remove_list_message(messages, t_m);
+      // Next message
+      node = node->next;
     } else {
-      message = message->next;
+      node_message *t_m = node;
+      node = node->next;
+      remove_list_message(list, t_m);
     }
   }
 
   free(n_message);
 }
 
-void recv_messages_device(int fifo, list_message *list) {
+void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
   node_message *node = NULL;
   ssize_t b_read;
 
@@ -175,6 +165,15 @@ void recv_messages_device(int fifo, list_message *list) {
         // Access acknowledgement shared memory
         semaphore_op(semid, 7, 0);
         semaphore_op(semid, 7, 1);
+
+        // Set the acknowledgement
+        shm_ack(node->value.message_id, dev_num).message_id =
+            node->value.message_id;
+        shm_ack(node->value.message_id, dev_num).pid_sender =
+            node->value.pid_sender;
+        shm_ack(node->value.message_id, dev_num).pid_receiver =
+            node->value.pid_receiver;
+        shm_ack(node->value.message_id, dev_num).timestamp = time(NULL);
 
         // Unlock the acknowledgement
         semaphore_op(semid, 7, -1);

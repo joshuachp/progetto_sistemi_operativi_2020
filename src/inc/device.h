@@ -23,10 +23,10 @@ void device_process(uint8_t dev_num);
  * @param pid PID of the device
  * @param dev_num Index of the device
  * @param position Current device position
- * @param messages List of the messages to check
+ * @param list List of the messages to check
  */
 void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
-                         list_message *messages);
+                         list_message *list);
 
 /**
  * Read all the messages in the FIFO. It will exit on error. If there is no
@@ -34,6 +34,7 @@ void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
  * message is added it will write the acknowledgment on the shared memory.
  *
  * @param fifo The device FIFO.
+ * @param dev_num Index of the device
  * @param list List of the device messages
  */
-void recv_messages_device(int fifo, list_message *list);
+void recv_messages_device(int fifo, uint8_t dev_num, list_message *list);
