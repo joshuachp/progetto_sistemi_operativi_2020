@@ -43,7 +43,9 @@ void append_list_message(list_message *list, node_message *node) {
     list->head = node;
     list->tail = node;
     list->length = 1;
+    node->prev = NULL;
   }
+  node->next = NULL;
 }
 
 void remove_list_message(list_message *list, node_message *node) {

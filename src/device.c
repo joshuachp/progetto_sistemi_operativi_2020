@@ -30,7 +30,7 @@ void device_process(uint8_t dev_num) {
   make_fifo_device(pid);
   // open FIFO device
   char *path = pid_fifo_path(pid);
-  int fifo = open(path, O_RDONLY);
+  int fifo = open(path, O_RDONLY | O_NONBLOCK);
   if (fifo == -1)
     err_exit("open", __FILE__, __LINE__);
   free(path);
@@ -45,7 +45,13 @@ void device_process(uint8_t dev_num) {
       semaphore_op(semid, BOARD_SEM, -1);
       semaphore_op(semid, ACK_SEM, -1);
 
-      check_send_messages(pid, dev_num, position, messages);
+      list_message *s_list =
+          check_send_messages(pid, dev_num, position, messages);
+      for (node_message *n_message = s_list->head; n_message != NULL;
+           n_message = n_message->next) {
+        send_message_device(&n_message->value);
+      }
+      free_list_message(s_list);
 
       // Unlock the acknowledgement and boar
       semaphore_op(semid, BOARD_SEM, 1);
@@ -74,10 +80,11 @@ void device_process(uint8_t dev_num) {
   }
 }
 
-void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
-                         list_message *list) {
+list_message *check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
+                                  list_message *list) {
+  list_message *send_list = create_list_message(NULL, NULL, 0);
   node_message *node;
-  Message *n_message = malloc(sizeof(Message));
+  node_message *n_message;
   bool msg_sent;
 
   // Cycle throw the messages
@@ -109,11 +116,13 @@ void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
               if (distance_sqr(position, (vec_2){i, j}) <=
                   node->value.max_distance) {
 
-                // Send the message
-                n_message = memcpy(n_message, &node->value, sizeof(Message));
-                n_message->pid_sender = pid;
-                n_message->pid_receiver = shm_dev[d_n];
-                send_message_device(n_message);
+                // Add message to send list
+                n_message = malloc(sizeof(node_message));
+                memcpy(&n_message->value, &node->value, sizeof(Message));
+                n_message->value.pid_sender = pid;
+                n_message->value.pid_receiver = shm_dev[d_n];
+                append_list_message(send_list, n_message);
+                n_message = NULL;
 
                 // Set msg_sent to pass to the next message
                 msg_sent = true;
@@ -132,7 +141,7 @@ void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
     }
   }
 
-  free(n_message);
+  return send_list;
 }
 
 void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
@@ -142,8 +151,9 @@ void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
   // Read all messages
   do {
     // Allocate message only if needed
-    if (node == NULL)
+    if (node == NULL) {
       node = malloc(sizeof(node_message));
+    }
 
     // Read a message
     b_read = read(fifo, &node->value, sizeof(Message));

@@ -17,16 +17,17 @@ void device_process(uint8_t dev_num);
 
 /**
  * Check the device without an acknowledgment of a specific message, if they
- * are in range it sends a message to them. If there is no acknowledgment for a
- * message it removes it.
+ * are in range it adds them to list of messages to send them. If there is no
+ * acknowledgment for a message it removes it.
  *
  * @param pid PID of the device
  * @param dev_num Index of the device
  * @param position Current device position
  * @param list List of the messages to check
+ * @return List of messages to send
  */
-void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
-                         list_message *list);
+list_message *check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
+                                  list_message *list);
 
 /**
  * Read all the messages in the FIFO. It will exit on error. If there is no
