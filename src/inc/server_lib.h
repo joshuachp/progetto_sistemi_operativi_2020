@@ -13,12 +13,15 @@ extern int shmid_board;
 extern pid_t *shm_board;
 // Acknowledgment shared memory
 extern int shmid_ack;
-// Shared array size ACK_SIZE * DEVICE_NUMBER. It is map of the message id, an
-// acknowledgement has the index of the message id it is from plus the device
-// number. The acknowledgement are ordered with the id of the message and the
-// then the device number to access and acknowledgement you have to multiply
-// message id for the device number and sum the current device number:
-//    shm_ack[msq_id * DEVICE_NUMBER + dev_num]
+/**
+ * NOTE: It is map of the message id and device number, an acknowledgement has
+ * the index of the message id it is from plus the device number. The
+ * acknowledgement are ordered with the id of the message and the then the
+ * device number to access and acknowledgement you have to multiply message id
+ * for the device number and sum the current device number:
+ *    shm_ack[msq_id * DEVICE_NUMBER + dev_num]
+ */
+// Shared array size ACK_SIZE * DEVICE_NUMBER.
 extern Acknowledgment *shm_ack;
 // Device pid shared memory
 extern int shmid_dev;

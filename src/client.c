@@ -32,7 +32,9 @@ int main(int argc, char *argv[]) {
 
   // Receive acknowledgment
   ack_msg *ack = malloc(sizeof(ack_msg));
-  if (msgrcv(msqid, ack, sizeof(ack->ack_list), message->message_id, 0) == -1)
+  // XXX: msg_type is id plus 1 to filter id 0
+  if (msgrcv(msqid, ack, sizeof(ack->ack_list), message->message_id + 1, 0) ==
+      -1)
     err_exit("msgrcv", __FILE__, __LINE__);
 
   // Write to out file

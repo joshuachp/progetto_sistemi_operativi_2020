@@ -42,13 +42,14 @@ void ack_manager_process() {
         ack_msg *ack = malloc(sizeof(ack_msg));
 
         // Sets the message type to the message id to filter messages
-        ack->mtype = msg_id;
+        // XXX: Plus 1 to filter id 0
+        ack->mtype = msg_id + 1;
         // Copy the acknowledgment list
         memcpy(ack->ack_list, &shm_ack(msg_id, 0),
                sizeof(Acknowledgment) * DEVICE_NUMBER);
         // Send message to client
         if (msgsnd(msqid, ack, sizeof(ack->ack_list), 0) == -1)
-          err_exit("msgrcv", __FILE__, __LINE__);
+          err_exit("msgsnd", __FILE__, __LINE__);
 
         // Free message and resets acknowledgments to 0
         free(ack);

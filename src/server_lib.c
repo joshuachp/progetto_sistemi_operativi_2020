@@ -170,7 +170,7 @@ void print_status(size_t step) {
     // Cycle throw acknowledgements to print message list for each device
     bool first = true;
     for (uint8_t msg_id = 0; msg_id < ACK_SIZE; msg_id++) {
-      if (shm_ack(msg_id, dev_num).message_id != 0) {
+      if (shm_ack(msg_id, dev_num).timestamp != 0) {
         if (first) {
           first = false;
           printf(" %u", msg_id);

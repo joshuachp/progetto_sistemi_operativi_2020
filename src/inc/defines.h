@@ -26,7 +26,7 @@
 /**
  * Messages sent from the clients to the devices
  */
-typedef struct {
+typedef struct Message {
   pid_t pid_sender;
   pid_t pid_receiver;
   // Message id can only bee in a range of [0,ACK_SIZE) because the shared
