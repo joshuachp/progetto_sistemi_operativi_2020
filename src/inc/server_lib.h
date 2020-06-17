@@ -21,6 +21,10 @@ extern int shmid_ack;
 // message id for the device number and sum the current device number:
 //    shm_ack[msq_id * DEVICE_NUMBER + dev_num]
 extern Acknowledgment *shm_ack;
+// Device pid shared memory
+extern int shmid_dev;
+// Shared array size DEVICE_NUMBER is the device PID
+extern pid_t *shm_dev;
 // Positions shared memory
 extern int shmid_positions;
 // Shared array size DEVICE_NUMBER is the devices next position
@@ -33,8 +37,6 @@ extern int msqid;
 extern pid_t pid_server;
 // PID of the acknowledgement manager
 extern pid_t pid_ack;
-// PID of each device
-extern pid_t pid_devices[5];
 
 /*
  * Prints the help for the SERVER

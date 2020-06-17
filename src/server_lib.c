@@ -25,13 +25,14 @@ int shmid_board;
 pid_t *shm_board;
 int shmid_ack;
 Acknowledgment *shm_ack;
+int shmid_dev;
+pid_t *shm_dev;
 int shmid_positions;
 vec_2 *shm_positions;
 int semid;
 int msqid;
 pid_t pid_server;
 pid_t pid_ack;
-pid_t pid_devices[DEVICE_NUMBER];
 
 void print_help_server(void) {
   puts("Usage:\n"
@@ -50,12 +51,12 @@ void termination_handler(int signum) {
       // Kill processes
       kill(pid_ack, SIGKILL);
       for (size_t i = 0; i < DEVICE_NUMBER; i++) {
-        kill(pid_devices[i], SIGKILL);
+        kill(shm_dev[i], SIGKILL);
       }
 
       // Remove FIFOs
       for (size_t i = 0; i < DEVICE_NUMBER; i++) {
-        remove_fifo_device(pid_devices[i]);
+        remove_fifo_device(shm_dev[i]);
       }
 
       // Remove board shared memory
@@ -63,6 +64,9 @@ void termination_handler(int signum) {
 
       // Remove acknowledgement shared memory
       remove_shared_memory(shmid_ack);
+
+      // Remove device PID shared memory
+      remove_shared_memory(shmid_dev);
 
       // Remove positions shared memory
       remove_shared_memory(shmid_positions);
@@ -129,19 +133,23 @@ void set_up_server(key_t key) {
   shm_ack = memset(shm_ack, 0, sizeof(Acknowledgment) * ACK_SIZE);
 
   // Create and attach shared memory positions
+  shmid_dev = alloc_shared_memory(IPC_PRIVATE, sizeof(pid_t) * DEVICE_NUMBER);
+  shm_dev = get_shared_memory(shmid_dev, 0);
+
+  // Create and attach shared memory positions
   shmid_positions =
       alloc_shared_memory(IPC_PRIVATE, sizeof(vec_2) * DEVICE_NUMBER);
   shm_positions = get_shared_memory(shmid_positions, 0);
   shm_positions = memset(shm_positions, 0, sizeof(vec_2) * DEVICE_NUMBER);
 
   // Create 7 semaphores and initialize it
-  semid = semget(IPC_PRIVATE, 4,
+  semid = semget(IPC_PRIVATE, 7,
                  IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR | S_IRGRP);
   if (semid == -1)
     err_exit("semget", __FILE__, __LINE__);
   // Initialize the semaphore set with semctl. The first 5 variables are for
   // the devices then board and the last one acknowledgement
-  unsigned short semInitVal[] = {0, 0, 0, 0, 0, 0, 0};
+  unsigned short semInitVal[] = {0, 0, 0, 0, 0, 1, 1};
   union semun arg;
   arg.array = semInitVal;
   if (semctl(semid, 0, SETALL, arg) == -1)
@@ -156,7 +164,7 @@ void set_up_server(key_t key) {
 void print_status(size_t step) {
   printf("# Step %zu: device positions ########################\n", step);
   for (uint8_t dev_num = 0; dev_num < DEVICE_NUMBER; dev_num++) {
-    printf("%u %hhu %hhu msgs:", pid_devices[dev_num], shm_positions[dev_num].i,
+    printf("%u %hhu %hhu msgs:", shm_dev[dev_num], shm_positions[dev_num].i,
            shm_positions[dev_num].j);
 
     // Cycle throw acknowledgements to print message list for each device
@@ -172,35 +180,38 @@ void print_status(size_t step) {
       }
     }
     if (first) {
-      printf(" <empty>.\n");
+      printf(" <empty>\n");
     } else {
-      printf(".\n");
+      printf("\n");
     }
   }
-  puts("#############################################");
+  puts("###################################################\n");
   fflush(stdout);
 }
 
 void server_process(list_positions *list) {
   // Current positions
-  node_positions *node = list->head;
+  node_positions *node;
+  while (1) {
+    node = list->head;
 
-  for (size_t i = 0; i < list->length; i++) {
-    // Waits two seconds
-    sleep(SLEEP_TIME_SERVER);
+    for (size_t i = 0; i < list->length; i++) {
+      // Waits two seconds
+      sleep(SLEEP_TIME_SERVER);
 
-    // Print positions
-    print_status(i);
+      // Print positions
+      print_status(i);
 
-    // Set positions of all devices
-    shm_positions =
-        memcpy(shm_positions, node->value, sizeof(vec_2) * DEVICE_NUMBER);
+      // Set positions of all devices
+      shm_positions =
+          memcpy(shm_positions, node->value, sizeof(vec_2) * DEVICE_NUMBER);
 
-    // Unlock first device
-    semaphore_op(semid, 0, 1);
+      // Unlock first device
+      semaphore_op(semid, 0, 1);
 
-    // Get next position
-    node = node->next;
+      // Get next position
+      node = node->next;
+    }
   }
 }
 

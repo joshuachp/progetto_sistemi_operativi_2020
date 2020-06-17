@@ -1,8 +1,10 @@
 /// @file device.c
 /// @brief Contains the implementation of function and variables for the device
 
-#include "device.h"
+#include <stdio.h>
+
 #include "defines.h"
+#include "device.h"
 #include "err_exit.h"
 #include "fifo.h"
 #include "semaphore.h"
@@ -18,8 +20,8 @@
 
 void device_process(uint8_t dev_num) {
   // Device pid
-  pid_t pid = pid_devices[dev_num];
-  // Current device position
+  pid_t pid = getpid();
+  // Current device positin
   vec_2 position = {0, 0};
   // Message list
   list_message *messages = create_list_message(NULL, NULL, 0);
@@ -40,16 +42,14 @@ void device_process(uint8_t dev_num) {
     // Check if we need to send messages
     if (messages->length > 0) {
       // Access acknowledgement and board shared memory
-      semaphore_op(semid, 6, 0);
-      semaphore_op(semid, 6, 1);
-      semaphore_op(semid, 7, 0);
-      semaphore_op(semid, 7, 1);
+      semaphore_op(semid, BOARD_SEM, -1);
+      semaphore_op(semid, ACK_SEM, -1);
 
       check_send_messages(pid, dev_num, position, messages);
 
       // Unlock the acknowledgement and boar
-      semaphore_op(semid, 6, -1);
-      semaphore_op(semid, 7, -1);
+      semaphore_op(semid, BOARD_SEM, 1);
+      semaphore_op(semid, ACK_SEM, 1);
     }
 
     // Read messages
@@ -57,8 +57,7 @@ void device_process(uint8_t dev_num) {
 
     // Move the device only if the next position is empty, otherwise resets the
     // position
-    semaphore_op(semid, 6, 0);
-    semaphore_op(semid, 6, 1);
+    semaphore_op(semid, ACK_SEM, -1);
     if (shm_board(shm_positions[dev_num].i, shm_positions[dev_num].j) == 0) {
       shm_board(position.i, position.j) = 0;
       COPY_POSITION(position, shm_positions[dev_num]);
@@ -66,7 +65,12 @@ void device_process(uint8_t dev_num) {
     } else {
       COPY_POSITION(position, shm_positions[dev_num]);
     }
-    semaphore_op(semid, 6, -1);
+    semaphore_op(semid, ACK_SEM, 1);
+
+    // Move next device
+    if (dev_num + 1 < DEVICE_NUMBER) {
+      semaphore_op(semid, dev_num + 1, 1);
+    }
   }
 }
 
@@ -94,7 +98,7 @@ void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
           if (shm_board(i, j) != 0 && shm_board(i, j) != pid) {
             // Device number
             uint8_t d_n = 0;
-            while (pid_devices[d_n] != shm_board(i, j))
+            while (shm_dev[d_n] != shm_board(i, j))
               d_n++;
 
             // Check if we need to send a message
@@ -108,7 +112,7 @@ void check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
                 // Send the message
                 n_message = memcpy(n_message, &node->value, sizeof(Message));
                 n_message->pid_sender = pid;
-                n_message->pid_receiver = pid_devices[d_n];
+                n_message->pid_receiver = shm_dev[d_n];
                 send_message_device(n_message);
 
                 // Set msg_sent to pass to the next message
@@ -165,8 +169,7 @@ void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
         append_list_message(list, node);
 
         // Access acknowledgement shared memory
-        semaphore_op(semid, 7, 0);
-        semaphore_op(semid, 7, 1);
+        semaphore_op(semid, ACK_SEM, -1);
 
         // Set the acknowledgement
         shm_ack(node->value.message_id, dev_num).message_id =
@@ -178,7 +181,7 @@ void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
         shm_ack(node->value.message_id, dev_num).timestamp = time(NULL);
 
         // Unlock the acknowledgement
-        semaphore_op(semid, 7, -1);
+        semaphore_op(semid, ACK_SEM, 1);
         node = NULL;
       }
 

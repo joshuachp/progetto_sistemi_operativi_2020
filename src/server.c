@@ -25,24 +25,26 @@ int main(int argc, char *argv[]) {
   set_up_server(key);
 
   // Fork ack manager
-  pid_ack = fork();
-  if (pid_ack == -1)
+  pid_t pid = fork();
+  if (pid == -1)
     err_exit("fork", __FILE__, __LINE__);
-  if (pid_ack == 0) {
+  if (pid == 0) {
     // ack manager
     return 0;
   }
+  pid_ack = pid;
 
   // Fork devices
-  for (size_t i = 0; i < DEVICE_NUMBER; i++) {
-    pid_devices[i] = fork();
-    if (pid_devices[i] == -1)
+  for (uint8_t i = 0; i < DEVICE_NUMBER; i++) {
+    pid = fork();
+    if (pid == -1)
       err_exit("fork", __FILE__, __LINE__);
-    if (pid_devices[i] == 0) {
+    if (pid == 0) {
       // device
       device_process(i);
       return 0;
     }
+    shm_dev[i] = pid;
   }
 
   // Signals setup
