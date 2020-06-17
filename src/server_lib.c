@@ -122,8 +122,8 @@ void set_up_server(key_t key) {
   shm_board = memset(shm_board, 0, sizeof(pid_t) * BOARD_SIZE * BOARD_SIZE);
 
   // Create, attach and sets to NULL shared memory acknowledgement
-  shmid_ack =
-      alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) * ACK_SIZE);
+  shmid_ack = alloc_shared_memory(IPC_PRIVATE, sizeof(Acknowledgment) *
+                                                   ACK_SIZE * DEVICE_NUMBER);
   shm_ack = get_shared_memory(shmid_ack, 0);
   shm_ack = memset(shm_ack, 0, sizeof(Acknowledgment) * ACK_SIZE);
 

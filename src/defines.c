@@ -46,6 +46,27 @@ void append_list_message(list_message *list, node_message *node) {
   }
 }
 
+void remove_list_message(list_message *list, node_message *node) {
+  // Check if null
+  if (list == NULL || node == NULL)
+    return;
+  // Check if head
+  if (list->head == node)
+    list->head = node->next;
+  // Check if tail
+  if (list->head == node)
+    list->tail = node->prev;
+  // Check if prev is not NULL to link to next
+  if (node->prev != NULL)
+    node->prev->next = node->next;
+  // Check if next is not NULL to link to prev
+  if (node->next != NULL)
+    node->next->prev = node->prev;
+
+  free(node);
+  list->length--;
+}
+
 void send_message_device(Message *message) {
   // Open FIFO device
   char *path = pid_fifo_path(message->pid_receiver);

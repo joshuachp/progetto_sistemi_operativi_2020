@@ -12,8 +12,10 @@
 #define MIN_POSITIONS_ARRAY_LENGTH 6
 #define BOARD_SIZE 10
 #define DEVICE_NUMBER 5
-#define ACK_SIZE (DEVICE_NUMBER * 20)
+#define ACK_SIZE 20
 #define SLEEP_TIME_SERVER 2
+#define shm_board(i, j) shm_board[i * BOARD_SIZE + j]
+#define shm_ack(msg_id, dev_num) shm_ack[msg_id * DEVICE_NUMBER + dev_num]
 
 /**
  * Messages sent from the clients to the devices
@@ -21,6 +23,8 @@
 typedef struct {
   pid_t pid_sender;
   pid_t pid_receiver;
+  // Message id can only bee in a range of [0,ACK_SIZE) because the shared
+  // memory is limited
   int message_id;
   char message[256];
   // Squared value of the max_distance for confront without using the square
@@ -91,6 +95,15 @@ void free_list_message(list_message *list);
  * @param node Node to append
  */
 void append_list_message(list_message *list, node_message *node);
+
+/**
+ * Remove the node from a list, double linking it. It will link the previews and
+ * next together. It will free the node.
+ *
+ * @param list The list
+ * @param node Node to remove
+ */
+void remove_list_message(list_message *list, node_message *node);
 
 /**
  * Send a message to a device throw its FIFO.

@@ -35,8 +35,9 @@ Message *create_message_client() {
 
   // Set the message ID
   printf("Message id: ");
-  while (scanf("%d", &message->message_id) != 1 || message->message_id < 0) {
-    puts("Please enter a valid ID.");
+  while (scanf("%d", &message->message_id) != 1 || message->message_id < 0 ||
+         message->message_id >= ACK_SIZE) {
+    printf("Please enter a valid ID [0,%d].\n", ACK_SIZE - 1);
     printf("Message ID: ");
   }
 
