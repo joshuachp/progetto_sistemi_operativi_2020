@@ -1,6 +1,7 @@
 build/
 .ccls-cache/
 .clangd/
+.vscode/
 
 CMakeLists.txt.user
 CMakeCache.txt
