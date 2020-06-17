@@ -1,39 +1,62 @@
-CFLAGS   = -Wall -std=gnu99
-INCLUDES = -I .
-OBJDIR   = obj
+CFLAGS   := -Wall -Wextra -pedantic -fdiagnostics-color
+INCLUDES := -I ./src/inc
+LIBS     := -lm
+OBJDIR   := build
 
-SERVER_SRCS = defines.c err_exit.c shared_memory.c semaphore.c fifo.c server.c
-SERVER_OBJS = $(addprefix $(OBJDIR)/, $(SERVER_SRCS:.c=.o))
+# keep track of these files
+KEEP_TRACK := Makefile
 
-CLIENT_SRCS = client.c
-CLIENT_OBJS = $(addprefix $(OBJDIR)/, $(CLIENT_SRCS:.c=.o))
+SERVER_FILES := server.c server_lib.c ack_manager.c device.c err_exit.c defines.c shared_memory.c semaphore.c fifo.c position.c files.c
+SERVER_SRCS := $(addprefix src/, $(SERVER_FILES))
+SERVER_OBJS := $(addprefix $(OBJDIR)/, $(SERVER_FILES:.c=.o))
 
-all: $(OBJDIR) server client
+CLIENT_FILES := client.c defines.c client_lib.c position.c fifo.c err_exit.c
+CLIENT_SRCS := $(addprefix src/, $(CLIENT_FILES))
+CLIENT_OBJS := $(addprefix $(OBJDIR)/, $(CLIENT_FILES:.c=.o))
 
-server: $(SERVER_OBJS)
-	@echo "Making executable: "$@
-	@$(CC) $^ -o $@  -lm
+# must be first rule
+default: all
 
-client: $(CLIENT_OBJS)
-	@echo "Making executable: "$@
-	@$(CC) $^ -o $@  -lm
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
-$(OBJDIR)/%.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+%.h:
+	@echo "(missing header $@)"
 
-run: clean server
+$(OBJDIR)/%.o: src/%.c src/inc/%.h $(KEEP_TRACK)
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $< $(LIBS)
+
+server: $(SERVER_OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o build/$@ $^ $(LIBS)
+	@echo "Server compiled."
+	@echo
+
+client: $(CLIENT_OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o build/$@ $^ $(LIBS)
+	@echo "Client compiled."
+	@echo
+
+
+run: server
 	@./server 100 input/file_posizioni.txt
 
 clean:
-	@rm -vf ${SERVER_OBJS}
-	@rm -vf ${CLIENT_OBJS}
+	@rm -vf $(SERVER_OBJS) $(CLIENT_OBJS)
 	@rm -vf server
 	@rm -vf client
 	@rm -vf /tmp/dev_fifo.*
 	@ipcrm -a
 	@echo "Removed object files and executables..."
+
+all: $(OBJDIR) server client
+
+cmake:
+	cmake -Bbuild -GNinja  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
+	ninja -C build/
+
+cmake_release:
+	cmake -Bbuild -GNinja  -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
+	ninja -C build/
 
 .PHONY: run clean

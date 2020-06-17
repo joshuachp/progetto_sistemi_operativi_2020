@@ -89,12 +89,12 @@ list_positions *read_positions_file(char *filename) {
   // Buffer
   int fd = open(filename, O_RDONLY, S_IRUSR | S_IRGRP);
   if (fd == -1) {
-    err_exit("open");
+    err_exit("open", __FILE__, __LINE__);
   }
   // File stats
   struct stat sb;
   if (fstat(fd, &sb) == -1)
-    err_exit("Error fstat");
+    err_exit("fstat", __FILE__, __LINE__);
 
   // Check size if null return
   if (sb.st_size == 0) {
@@ -134,13 +134,13 @@ list_positions *read_positions_file(char *filename) {
         return NULL;
       }
 
-      if (n_index >= b_read && file_read < sb.st_size) {
+      if (n_index >= b_read && file_read < (size_t)sb.st_size) {
         file_read -= n_index - index;
         if (lseek(fd, file_read, SEEK_SET) == -1) {
           free(line);
           free(buf);
           free_list_positions(positions);
-          err_exit("lseek");
+          err_exit("lseek", __FILE__, __LINE__);
         }
         break;
       }
