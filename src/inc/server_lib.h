@@ -1,6 +1,5 @@
 /// @file server_lib.h
-/// @brief  Contiene la definizioni di variabili e funzioni specifiche per il
-///         SERVER.
+/// @brief  Contains the declaration of functions and variables for the SERVER.
 
 #pragma once
 
@@ -14,11 +13,23 @@ extern int shmid_board;
 extern pid_t *shm_board;
 // Acknowledgment shared memory
 extern int shmid_ack;
-// Shared array size ACK_SIZE
+/**
+ * NOTE: It is map of the message id and device number, an acknowledgement has
+ * the index of the message id it is from plus the device number. The
+ * acknowledgement are ordered with the id of the message and the then the
+ * device number to access and acknowledgement you have to multiply message id
+ * for the device number and sum the current device number:
+ *    shm_ack[msq_id * DEVICE_NUMBER + dev_num]
+ */
+// Shared array size ACK_SIZE * DEVICE_NUMBER.
 extern Acknowledgment *shm_ack;
+// Device pid shared memory
+extern int shmid_dev;
+// Shared array size DEVICE_NUMBER is the device PID
+extern pid_t *shm_dev;
 // Positions shared memory
 extern int shmid_positions;
-// Shared array size DEVICE_NUMBER
+// Shared array size DEVICE_NUMBER is the devices next position
 extern vec_2 *shm_positions;
 // Semaphore set id
 extern int semid;
@@ -28,8 +39,6 @@ extern int msqid;
 extern pid_t pid_server;
 // PID of the acknowledgement manager
 extern pid_t pid_ack;
-// PID of each device
-extern pid_t pid_devices[5];
 
 /*
  * Prints the help for the SERVER
@@ -71,9 +80,3 @@ void print_status(size_t step);
  */
 void server_process(list_positions *list);
 
-/**
- * Function for the devices, create a FIFO
- *
- * @param dev_num Device number for semaphores
- */
-void device_process(size_t dev_num);

@@ -4,7 +4,6 @@
 #include "client_lib.h"
 #include "defines.h"
 #include "err_exit.h"
-#include "message.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +19,7 @@ void print_help_client() {
        "With the KEY of the message queue.");
 }
 
-Message *create_message_client(pid_t *pid) {
+Message *create_message_client() {
   Message *message = malloc(sizeof(Message));
 
   // Set the sender PID
@@ -28,16 +27,17 @@ Message *create_message_client(pid_t *pid) {
 
   // Set the device PID
   printf("PID of the device: ");
-  while (scanf("%d", pid) != 1 || *pid < 0) {
+  while (scanf("%d", &message->pid_receiver) != 1 ||
+         message->pid_receiver < 0) {
     puts("Please enter a valid PID.");
     printf("PID of the device: ");
   }
-  message->pid_receiver = *pid;
 
   // Set the message ID
   printf("Message id: ");
-  while (scanf("%d", &message->message_id) != 1 || message->message_id < 0) {
-    puts("Please enter a valid ID.");
+  while (scanf("%d", &message->message_id) != 1 || message->message_id < 0 ||
+         message->message_id >= ACK_SIZE) {
+    printf("Please enter a valid ID [0,%d].\n", ACK_SIZE - 1);
     printf("Message ID: ");
   }
 
@@ -48,26 +48,15 @@ Message *create_message_client(pid_t *pid) {
     printf("Message ID: ");
   }
 
-  // Set the maximum distance
-  // NOTE: We ask for a double value, but we convert it in uint8_t since the
-  //      squared maximum value can only be 10^2+10^2=200
-  double max;
   printf("Message max distance: ");
-  while (scanf("%lf", &max) != 1 && max < 0) {
+  while (scanf("%lf", &message->max_distance) != 1 &&
+         message->max_distance < 0) {
     printf("Message ID: ");
     puts("Please enter a valid max distance.");
   }
-  message->max_distance = max_distance_sqr(max);
+  // We square the value
+  message->max_distance *= message->max_distance;
   return message;
-}
-
-uint8_t max_distance_sqr(double max_distance) {
-  // Overflow and other control for conversion
-  if (200 / max_distance <= 14.142135624) {
-    return 200;
-  }
-  double m = max_distance * max_distance + 1e-8;
-  return m;
 }
 
 void write_out_message_id(Message *message, Acknowledgment ack_list[5]) {

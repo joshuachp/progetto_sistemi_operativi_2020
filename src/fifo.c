@@ -12,11 +12,11 @@
 
 char *pid_fifo_path(pid_t pid) {
   // Get length of the final string for allocation
-  int length = snprintf(NULL, 0, "/tmp/devices/dev_fifo.%d", pid);
+  int length = snprintf(NULL, 0, "/tmp/dev_fifo.%d", pid);
   if (length == -1)
     print_perror("snprintf", __FILE__, __LINE__);
   char *path = malloc(length + 1);
-  if (sprintf(path, "/tmp/devices/dev_fifo.%d", pid) != length)
+  if (sprintf(path, "/tmp/dev_fifo.%d", pid) == -1)
     print_perror("sprintf", __FILE__, __LINE__);
   return path;
 }

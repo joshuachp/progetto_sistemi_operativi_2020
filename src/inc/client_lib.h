@@ -5,7 +5,6 @@
 #pragma once
 
 #include "defines.h"
-#include "message.h"
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -22,16 +21,16 @@ void print_help_client(void);
  * @param pid PID of the device to send the message to.
  * @return Message struct with the data inputed by the user
  */
-Message *create_message_client(pid_t *pid);
+Message *create_message_client();
 
 /**
- * Approximate max distance, converts a double max distance in its uint8_t
- * squared version. Separated from the main function for test.
+ * Calculates the square of the max distance, it handles overflows setting the
+ * max distance to the max distance on the board plus 1.
  *
  * @pram max_distance The double version of max distance
- * @return The uint8_t square of max_distance
+ * @return The square of max_distance
  */
-uint8_t max_distance_sqr(double max_distance);
+double max_distance_sqr(double max_distance);
 
 /**
  * Writes the list of acknowledgment to the file `out_<message_id>.txt`

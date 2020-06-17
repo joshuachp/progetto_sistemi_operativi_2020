@@ -12,5 +12,5 @@ extern "C" {
  */
 TEST(pid_fifo_path, ok) {
   char *path = pid_fifo_path(1234);
-  ASSERT_TRUE(strcmp("/tmp/devices/dev_fifo.1234", path) == 0);
+  ASSERT_TRUE(strcmp("/tmp/dev_fifo.1234", path) == 0);
 }

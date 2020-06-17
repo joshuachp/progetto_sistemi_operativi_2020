@@ -39,7 +39,7 @@ typedef struct list_positions {
  *
  * @param arg1 Point a
  * @param arg2 Point b
- * @return Distance from a to b
+ * @return Distance squared from a to b
  */
 uint8_t distance_sqr(vec_2 arg1, vec_2 arg2);
 

@@ -47,5 +47,7 @@ void append_list_positions(list_positions *list, node_positions *node) {
     list->head = node;
     list->tail = node;
     list->length = 1;
+    node->prev = NULL;
   }
+  node->next = NULL;
 }
