@@ -14,6 +14,7 @@ set( CLIENT_SRC
 )
 set( SERVER_SRC
   src/server_lib.c
+  src/ack_manager.c
   src/device.c
   src/err_exit.c
   src/defines.c

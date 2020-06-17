@@ -92,8 +92,7 @@ list_message *check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
   while (node != NULL) {
 
     // Check for acknowledgement of the message, otherwise remove it
-    if (shm_ack(node->value.message_id, dev_num).message_id ==
-        node->value.message_id) {
+    if (shm_ack(node->value.message_id, dev_num).timestamp != 0) {
       msg_sent = false;
 
       // Check the board for a device, get the device number and check if we
@@ -109,8 +108,7 @@ list_message *check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
               d_n++;
 
             // Check if we need to send a message
-            if (shm_ack(node->value.message_id, d_n).message_id !=
-                node->value.message_id) {
+            if (shm_ack(node->value.message_id, d_n).timestamp == 0) {
 
               // Check if the distance is inferior to max distance
               if (distance_sqr(position, (vec_2){i, j}) <=

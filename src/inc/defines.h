@@ -14,6 +14,7 @@
 #define DEVICE_NUMBER 5
 #define ACK_SIZE 20
 #define SLEEP_TIME_SERVER 2
+#define SLEEP_TIME_ACK_MANAGER 5
 #define BOARD_SEM 5
 #define ACK_SEM 6
 #define shm_board(i, j) shm_board[i * BOARD_SIZE + j]

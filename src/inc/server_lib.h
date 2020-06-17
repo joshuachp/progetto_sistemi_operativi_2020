@@ -1,6 +1,5 @@
 /// @file server_lib.h
-/// @brief  Contiene la definizioni di variabili e funzioni specifiche per il
-///         SERVER.
+/// @brief  Contains the declaration of functions and variables for the SERVER.
 
 #pragma once
 

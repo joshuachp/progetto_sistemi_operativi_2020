@@ -1,6 +1,7 @@
 /// @file server.c
 /// @brief Contiene l'implementazione del SERVER.
 
+#include "ack_manager.h"
 #include "defines.h"
 #include "device.h"
 #include "err_exit.h"
@@ -30,6 +31,7 @@ int main(int argc, char *argv[]) {
     err_exit("fork", __FILE__, __LINE__);
   if (pid == 0) {
     // ack manager
+    ack_manager_process();
     return 0;
   }
   pid_ack = pid;
