@@ -15,7 +15,7 @@ CLIENT_SRCS := $(addprefix src/, $(CLIENT_FILES))
 CLIENT_OBJS := $(addprefix $(OBJDIR)/, $(CLIENT_FILES:.c=.o))
 
 # must be first rule
-default: all
+default: cmake_release
 
 
 $(OBJDIR):
@@ -52,11 +52,15 @@ clean:
 all: $(OBJDIR) server client
 
 cmake:
-	cmake -Bbuild -GNinja  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
+	mkdir -p build
+	cd build
+	cmake -GNinja  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
 	ninja -C build/
 
 cmake_release:
-	cmake -Bbuild -GNinja  -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
-	ninja -C build/
+	mkdir -p build
+	cd build
+	cmake -GNinja  -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
+	ninja
 
 .PHONY: run clean
