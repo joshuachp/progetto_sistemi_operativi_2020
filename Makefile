@@ -52,15 +52,13 @@ clean:
 all: $(OBJDIR) server client
 
 cmake:
-	mkdir -p build
-	cd build
-	cmake -GNinja  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
-	ninja -C build/
+	@mkdir -p build
+	@cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
+	@cd build && ninja
 
 cmake_release:
-	mkdir -p build
-	cd build
-	cmake -GNinja  -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
-	ninja
+	@mkdir -p build
+	@cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
+	@cd build && ninja
 
 .PHONY: run clean
