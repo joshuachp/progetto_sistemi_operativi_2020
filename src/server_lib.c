@@ -11,6 +11,7 @@
 #include "shared_memory.h"
 #include <fcntl.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -131,6 +132,7 @@ void set_up_server(key_t key) {
   shmid_positions =
       alloc_shared_memory(IPC_PRIVATE, sizeof(vec_2) * DEVICE_NUMBER);
   shm_positions = get_shared_memory(shmid_positions, 0);
+  shm_positions = memset(shm_positions, 0, sizeof(vec_2) * DEVICE_NUMBER);
 
   // Create 7 semaphores and initialize it
   semid = semget(IPC_PRIVATE, 4,
@@ -153,12 +155,30 @@ void set_up_server(key_t key) {
 
 void print_status(size_t step) {
   printf("# Step %zu: device positions ########################\n", step);
-  for (int i = 0; i < DEVICE_NUMBER; i++) {
-    // TODO: Message list
-    printf("%u %hhu %hhu msgs: lista message_id\n", pid_devices[i],
-           shm_positions[i].i, shm_positions[i].j);
+  for (uint8_t dev_num = 0; dev_num < DEVICE_NUMBER; dev_num++) {
+    printf("%u %hhu %hhu msgs:", pid_devices[dev_num], shm_positions[dev_num].i,
+           shm_positions[dev_num].j);
+
+    // Cycle throw acknowledgements to print message list for each device
+    bool first = true;
+    for (uint8_t msg_id = 0; msg_id < ACK_SIZE; msg_id++) {
+      if (shm_ack(msg_id, dev_num).message_id != 0) {
+        if (first) {
+          first = false;
+          printf(" %u", msg_id);
+        } else {
+          printf(", %u", msg_id);
+        }
+      }
+    }
+    if (first) {
+      printf(" <empty>.\n");
+    } else {
+      printf(".\n");
+    }
   }
   puts("#############################################");
+  fflush(stdout);
 }
 
 void server_process(list_positions *list) {
@@ -169,12 +189,12 @@ void server_process(list_positions *list) {
     // Waits two seconds
     sleep(SLEEP_TIME_SERVER);
 
+    // Print positions
+    print_status(i);
+
     // Set positions of all devices
     shm_positions =
         memcpy(shm_positions, node->value, sizeof(vec_2) * DEVICE_NUMBER);
-
-    // Print positions
-    print_status(i);
 
     // Unlock first device
     semaphore_op(semid, 0, 1);

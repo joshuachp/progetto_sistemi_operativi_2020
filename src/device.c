@@ -55,14 +55,16 @@ void device_process(uint8_t dev_num) {
     // Read messages
     recv_messages_device(fifo, dev_num, messages);
 
-    // Move the device only if the next position is empty
+    // Move the device only if the next position is empty, otherwise resets the
+    // position
     semaphore_op(semid, 6, 0);
     semaphore_op(semid, 6, 1);
     if (shm_board(shm_positions[dev_num].i, shm_positions[dev_num].j) == 0) {
       shm_board(position.i, position.j) = 0;
-      position.i = shm_positions[dev_num].i;
-      position.j = shm_positions[dev_num].j;
+      COPY_POSITION(position, shm_positions[dev_num]);
       shm_board(position.i, position.j) = pid;
+    } else {
+      COPY_POSITION(position, shm_positions[dev_num]);
     }
     semaphore_op(semid, 6, -1);
   }

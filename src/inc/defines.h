@@ -16,6 +16,9 @@
 #define SLEEP_TIME_SERVER 2
 #define shm_board(i, j) shm_board[i * BOARD_SIZE + j]
 #define shm_ack(msg_id, dev_num) shm_ack[msg_id * DEVICE_NUMBER + dev_num]
+#define COPY_POSITION(a, b)                                                    \
+  a.i = b.i;                                                                   \
+  a.j = b.j;
 
 /**
  * Messages sent from the clients to the devices
