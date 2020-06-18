@@ -1,4 +1,4 @@
-CFLAGS   := -Wall -Wextra -pedantic -fdiagnostics-color
+CFLAGS   := -Wall -Wextra -pedantic -fdiagnostics-color -DNDEBUG
 INCLUDES := -I ./src/inc
 LIBS     := -lm
 OBJDIR   := build
@@ -15,8 +15,7 @@ CLIENT_SRCS := $(addprefix src/, $(CLIENT_FILES))
 CLIENT_OBJS := $(addprefix $(OBJDIR)/, $(CLIENT_FILES:.c=.o))
 
 # must be first rule
-default: cmake_release
-
+default: cmake-release
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
@@ -37,28 +36,28 @@ client: $(CLIENT_OBJS)
 	@echo "Client compiled."
 	@echo
 
-
 run: server
 	@./server 100 input/file_posizioni.txt
 
 clean:
-	@rm -vf $(SERVER_OBJS) $(CLIENT_OBJS)
-	@rm -vf server
-	@rm -vf client
+	@rm -vrf $(OBJDIR)
 	@rm -vf /tmp/dev_fifo.*
 	@ipcrm -a
 	@echo "Removed object files and executables..."
 
-all: $(OBJDIR) server client
+legacy: $(OBJDIR) server client
 
 cmake:
 	@mkdir -p build
 	@cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
 	@cd build && ninja
 
-cmake_release:
+cmake-release:
 	@mkdir -p build
 	@cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..
 	@cd build && ninja
+
+test: cmake
+	@cd build; ctest
 
 .PHONY: run clean
