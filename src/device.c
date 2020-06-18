@@ -91,6 +91,10 @@ list_message *check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
   node = list->head;
   while (node != NULL) {
 
+    // XXX: Debug
+    printf("Dev %u Checking self t: %li", dev_num,
+           shm_ack(node->value.message_id, dev_num).timestamp);
+
     // Check for acknowledgement of the message, otherwise remove it
     if (shm_ack(node->value.message_id, dev_num).timestamp != 0) {
       msg_sent = false;
@@ -106,6 +110,10 @@ list_message *check_send_messages(pid_t pid, uint8_t dev_num, vec_2 position,
             uint8_t d_n = 0;
             while (shm_dev[d_n] != shm_board(i, j))
               d_n++;
+
+            // XXX: Debug
+            printf("Dev %u Checking timestamp of %u: %li", dev_num, d_n,
+                   shm_ack(node->value.message_id, d_n).timestamp);
 
             // Check if we need to send a message
             if (shm_ack(node->value.message_id, d_n).timestamp == 0) {
@@ -156,6 +164,10 @@ void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
     // Read a message
     b_read = read(fifo, &node->value, sizeof(Message));
 
+    // XXX: Debug
+    printf("Dev %u read %u size %d\n", dev_num, node->value.message_id,
+           (int)b_read);
+
     // Check for errors
     if (b_read == -1)
       err_exit("read", __FILE__, __LINE__);
@@ -167,8 +179,14 @@ void recv_messages_device(int fifo, uint8_t dev_num, list_message *list) {
       bool msg_found = false;
       for (node_message *msg = list->head; msg != NULL && !msg_found;
            msg = msg->next) {
-        if (msg->value.message_id == node->value.message_id)
+        if (msg->value.message_id == node->value.message_id) {
+
+          // XXX: Debug
+          printf("Dev %u found %u not adding\n", dev_num,
+                 node->value.message_id);
+
           msg_found = true;
+        }
       }
 
       // If message was not found add it to the list and write an

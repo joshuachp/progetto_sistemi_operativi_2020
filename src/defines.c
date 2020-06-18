@@ -56,7 +56,7 @@ void remove_list_message(list_message *list, node_message *node) {
   if (list->head == node)
     list->head = node->next;
   // Check if tail
-  if (list->head == node)
+  if (list->tail == node)
     list->tail = node->prev;
   // Check if prev is not NULL to link to next
   if (node->prev != NULL)
