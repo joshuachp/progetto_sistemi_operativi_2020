@@ -10,6 +10,8 @@
 
 #define BUF_READ_SIZE 256
 #define BUFF_MESSAGE_SIZE 256
+// Max allocation size for strings like paths or file outputs
+#define STRING_ALLOC_SIZE 1024
 #define MIN_POSITIONS_ARRAY_LENGTH 6
 #define BOARD_SIZE 10
 #define DEVICE_NUMBER 5
