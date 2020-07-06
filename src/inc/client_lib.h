@@ -8,6 +8,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+// Size of the time buffer for the format
+#define TIME_BUF_SIZE 64
+
 /**
  * Prints the help for the CLIENT
  */

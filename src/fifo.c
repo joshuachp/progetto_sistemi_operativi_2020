@@ -3,6 +3,7 @@
 ///         specifiche per la gestione delle FIFO.
 
 #include "fifo.h"
+#include "defines.h"
 #include "err_exit.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,12 +13,9 @@
 
 char *pid_fifo_path(pid_t pid) {
   // Get length of the final string for allocation
-  int length = snprintf(NULL, 0, "/tmp/dev_fifo.%d", pid);
-  if (length == -1)
+  char *path = malloc(STRING_ALLOC_SIZE);
+  if (snprintf(path, STRING_ALLOC_SIZE, "/tmp/dev_fifo.%d", pid) == -1)
     print_perror("snprintf", __FILE__, __LINE__);
-  char *path = malloc(length + 1);
-  if (sprintf(path, "/tmp/dev_fifo.%d", pid) == -1)
-    print_perror("sprintf", __FILE__, __LINE__);
   return path;
 }
 

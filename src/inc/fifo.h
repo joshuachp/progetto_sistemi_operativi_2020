@@ -8,7 +8,7 @@
 
 /**
  * Allocate a string for the file path of the FIFO file of a specific device,
- * the string needs to be deallocated.
+ * the string needs to be deallocated. The max FIFO path size is 1024 bits.
  *
  * @param pid PID of the device
  */
