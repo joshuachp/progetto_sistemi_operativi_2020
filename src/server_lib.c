@@ -92,15 +92,15 @@ void setup_sig_handler() {
   sigset_t block_mask;
 
   // Blocking signals
-  sigemptyset(&block_mask);
-  sigaddset(&block_mask, SIGSTOP);
+  sigfillset(&block_mask);
+  sigdelset(&block_mask, SIGTERM);
 
-#ifdef NDEBUG
+#ifndef NDEBUG
   // Block <C-c> for release build
-  sigaddset(&block_mask, SIGINT);
+  sigdelset(&block_mask, SIGINT);
 #endif
 
-  sigprocmask(SIG_BLOCK, &block_mask, NULL);
+  sigprocmask(SIG_SETMASK, &block_mask, NULL);
 
   // Setting up SIGTERM handler
   action.sa_handler = termination_handler;
